@@ -57,9 +57,8 @@ class TrajectoryGenerator:
             is_near_wall, turn_angle = self.avoid_wall(position[t], head_dir[t], box_width, box_height)
             if is_near_wall:
                 v *= 0.25 # slow down
-                
-            # Update turn angle
-            turn_angle += dt * random_turn[t]
+            else:
+                turn_angle += dt * random_turn[t]
 
             # Take a step
             velocity[t] = v * dt
