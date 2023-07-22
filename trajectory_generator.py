@@ -33,7 +33,7 @@ class TrajectoryGenerator:
 
         samples = self.sequence_length
         dt = 0.02  # time step increment (seconds)
-        b = 0.13 * 2 * np.pi # forward velocity Rayleigh distribution scale (m/s)
+        b = 0.13 * 2 * np.pi # forward velocity Rayleigh distribution scale
         mu = 0  # rotation velocity Gaussian distribution mean (rad/s)
         sigma = 5.76 * 2   # rotation velocity Gaussian distribution stdev (rads/s)
 
