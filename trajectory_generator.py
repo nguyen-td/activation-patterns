@@ -11,7 +11,18 @@ class TrajectoryGenerator:
         self.batch_size = batch_size
 
     def avoid_wall(self, position, head_dir):
-        """Compute distance and angle to nearest wall."""
+        """
+        Compute distance and angle to nearest wall.
+
+        Input:
+            head_dir: (batch_size x T) Numpy array
+                Head direction (rads)
+        Outputs:
+            is_near_wall: (batch_size, ) 
+                List of boolean values
+            turn_angle: (batch_size, )
+                List of turn angles
+        """
         x = position[:, 0]
         y = position[:, 1]
         dists = [self.box_width / 2 - x, self.box_height / 2 - y, self.box_width / 2 + x, self.box_height / 2 + y]
@@ -31,7 +42,17 @@ class TrajectoryGenerator:
         return is_near_wall, turn_angle
 
     def generate_trajectory(self):
-        """Generate a random walk in a rectangular box."""
+        """
+        Generate a random walk in a rectangular box.
+        
+        Outputs:
+            position: (batch_size x T x 2) Numpy array
+                Position in 2D (x and y coordinates)
+            velocity: (batch_size x T) Numpy array
+                Velocity (m/sample)
+            head_dir: (batch_size x T) Numpy array
+                Head direction (rads)
+        """
 
         samples = self.sequence_length
         dt = 0.02  # time step increment (seconds)
