@@ -19,7 +19,7 @@ class RNNLayer(nn.Module):
         self.W_in = nn.Parameter(W_in)
         self.W_rec = nn.Parameter(W_rec)
         self.b = nn.Parameter(torch.zeros(self.hidden_size))
-        self.xi = torch.normal(std = torch.full(self.hidden_size, 1 / self.input_size))
+        self.xi = torch.normal(std = torch.full(self.hidden_size, 1 / self.input_size)) # not trained
 
     def rnn_dynamics(self, x, I, tau):
         u = torch.tanh(x)
@@ -29,5 +29,5 @@ class RNNLayer(nn.Module):
 
     def forward_euler(self, x, I, dt, tau):
         x, u = x + dt * self.rnn_dynamics(x, I, tau)
-        
+
         return x, u
