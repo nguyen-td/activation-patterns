@@ -10,14 +10,14 @@ class RNNLayer(nn.Module):
     N_out: Number of output neurons
     T: Sequence length
     M: Mini-batch size
-
     """
 
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size, hidden_size, batch_size):
         super(RNNLayer, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
+        self.batch_size = batch_size
 
         # initialize trainable parameters according to Cueva & Wei, 2018
         W_in = torch.empty(self.hidden_size, self.input_size)
@@ -27,7 +27,7 @@ class RNNLayer(nn.Module):
 
         self.W_in = nn.Parameter(W_in)
         self.W_rec = nn.Parameter(W_rec)
-        self.b = nn.Parameter(torch.zeros(self.hidden_size))
+        self.b = nn.Parameter(torch.zeros(self.hidden_size, 1))
         self.xi = torch.normal(mean = 0, std = torch.full((self.hidden_size, 1), 1 / self.input_size)) # not trained
 
     def rnn_dynamics(self, x, I, tau):
@@ -35,31 +35,37 @@ class RNNLayer(nn.Module):
         Dynamics of the units in the layer.
 
         Inputs: 
-            x: (M x N) Torch tensor
+            x: (1 x N) Torch tensor
                 Activation of the units
-            I: (M x N_in) Torch tensor
+            I: (1 x N_in) Torch tensor
                 Input to the layer
             tau: Scalar
                 Time scale of decay
 
         Outputs:
-            x: (M x N) Torch tensor
+            x: (1 x N) Torch tensor
                 Activation of the units
-            u: (M x N) Torch tensor
+            u: (1 x N) Torch tensor
                 Firing activity of the units
         """
         
+        # expand terms for matrix operation with batches
+        b = self.b 
+        b = torch.t(b.expand(-1, self.batch_size)).double()
+        xi = self.xi
+        xi = torch.t(xi.expand(-1, self.batch_size)).double()
+
         u = torch.tanh(x)
-        x = 1 / tau * (-x + torch.matmul(self.W_rec, u) + torch.matmul(self.W_in, I) + self.b + self.xi)
+        x = 1 / tau * (-x + torch.matmul(u, self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
 
         return x, u
 
-    def forward_euler(self, x, I, dt, tau):
+    def forward_euler(self, x_in, I, dt, tau):
         """
         Forward Euler integration of the differential equation.
 
         Inputs: 
-            x: (M x N) Torch tensor
+            x_in: (M x N) Torch tensor
                 Activation of a unit
             I: (M x N_in) Torch tensor
                 Input to the layer
@@ -68,12 +74,13 @@ class RNNLayer(nn.Module):
             tau: Scalar
                 Time scale of decay
         Outputs:
-            x: (M x N) Torch tensor
+            x_out: (M x N) Torch tensor
                 Activation of the units
             u: (M x N) Torch tensor
                 Firing activity of the units
 
         """
-        x, u = x + dt * self.rnn_dynamics(x, I, tau)
+        x_out, u = self.rnn_dynamics(x_in, I, tau)
+        x = x_in + dt * x_out
 
         return x, u

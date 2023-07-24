@@ -1,16 +1,19 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
+from torch import autograd
+import numpy as np
+import time
+
+from more_itertools import chunked
+from matplotlib import pyplot as plt
+
 from network import RNNModel
 from trajectory_generator import TrajectoryGenerator
-from more_itertools import chunked
-import torch.optim as optim
-from torchsummary import summary
 
-def loss_fn(pred, y, W_in, W_out, u, l_l2,l_fr):
-    R_l2 = torch.mean(W_in**2) + torch.mean(W_out**2) # L2 regularization to penalize large network parameters
-    R_fr = torch.mean(u**2) # minimize metabolic cost
-    E = torch.mean((pred - y)**2) + l_l2 * R_l2 + l_fr * R_fr # minimize error of animal
-    return E
+
+# device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
 # generate training data
 T = 20  # duration of simulated trajectories (seconds)
@@ -21,41 +24,68 @@ sequence_length = T * srate  # number of steps in trajectory
 box_width = 2.2       # width of training environment (m)
 box_height = 2.2      # height of training environment (m)
 mini_batch_size = 64
-n_data = mini_batch_size * 30
+n_data = mini_batch_size * 2
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
 
-# make mini-batches
-pos_batch = list(chunked(position, mini_batch_size))
-vel_batch = list(chunked(velocity, mini_batch_size))
-hd_batch = list(chunked(head_dir, mini_batch_size))
+# make training and target (ground truth) data
+training_data = np.stack((velocity, head_dir), axis=1)
+target_data = np.transpose(position, (0, 2, 1))
 
-# TODO: put velocity and hd batches together to make a (M x 2 x T) input tensor
+# make mini-batches
+train_batch = torch.as_tensor(np.array(list((chunked(training_data, mini_batch_size)))), device=device)
+target_batch = torch.as_tensor(np.array(list((chunked(target_data, mini_batch_size)))), device=device)
 
 # initialize model
 hidden_size = 100 # Cueva et al., 2018
 learning_rate = 1e-4 # Sorscher et al., 2023
 l2_rate = 1e-4 # Sorscher et al., 2023
 fr_rate = 1e-4
-device = 'cpu'
-n_epochs = 10
-# device = 'cuda:0'
+n_epochs = 3
+n_batches = int(n_data / mini_batch_size)
+x0 = 0
 
-model = RNNModel(hidden_size)
+model = RNNModel(hidden_size, mini_batch_size)
+model.double()
 optimizer = optim.RMSprop(model.parameters(), lr=learning_rate)
 model.to(device)
 print(model)
-# summary(model, (mini_batch_size, 2, sequence_length))
 
-for t in range(n_epochs):
-    print(f"Epoch {t+1}\n-------------------------------")
+train_loss_epochs = np.zeros(n_epochs)
+for epoch in range(n_epochs):
+    print(f"Epoch {epoch+1}\n-------------------------------")
 
-    for batch in range(mini_batch_size):
+    start = time.time()
+    train_loss = 0
+    for batch in range(n_batches):
+
         # clear out gradients
         model.zero_grad()
 
         # forward pass
-        x, u, y = model.forward()
+        x, u, y = model.forward(train_batch[batch], x0)
+        W_in = model.rnn.W_in
+        W_out = model.linear.weight
+
+        # compute error
+        loss = model.loss(y.detach(), target_batch[batch], W_in, W_out, u, l2_rate, fr_rate)
+        train_loss += loss.item()
+
+        # compute gradient and update parameters
+        loss.backward()
+        optimizer.step()
+        print(f"loss: {train_loss}")
+
+    train_loss /= n_batches
+    train_loss_epochs[epoch] = train_loss
+    end = time.time()
+
+    print(f"Training loss: {train_loss}  {round(end - start, 3)} seconds for this epoch \n")
+
+plt.plot(train_loss)
+plt.show()
+
+
 
 
