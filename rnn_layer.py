@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class RNNLayer(nn.Module):
     """
     Single custom RNN layer implementing the standard continuous-time RNN equation.
@@ -35,17 +36,17 @@ class RNNLayer(nn.Module):
         Dynamics of the units in the layer.
 
         Inputs: 
-            x: (1 x N) Torch tensor
+            x: (M x N) Torch tensor
                 Activation of the units
-            I: (1 x N_in) Torch tensor
+            I: (M x N_in) Torch tensor
                 Input to the layer
             tau: Scalar
                 Time scale of decay
 
         Outputs:
-            x: (1 x N) Torch tensor
+            x: (M x N) Torch tensor
                 Activation of the units
-            u: (1 x N) Torch tensor
+            u: (M x N) Torch tensor
                 Firing activity of the units
         """
         
@@ -80,6 +81,7 @@ class RNNLayer(nn.Module):
                 Firing activity of the units
 
         """
+        
         x_out, u = self.rnn_dynamics(x_in, I, tau)
         x = x_in + dt * x_out
 

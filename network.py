@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from rnn_layer import RNNLayer
 
+
 class RNNModel(nn.Module):
     """
     Recurrent neural network consisting of a continous-time RNN layer and a linear layer.
@@ -14,7 +15,6 @@ class RNNModel(nn.Module):
     """
 
     def __init__(self, hidden_size, batch_size, dt=0.02, tau=0.1):
-
         super(RNNModel, self).__init__()
 
         self.input_size = 2 # velocity, head direction

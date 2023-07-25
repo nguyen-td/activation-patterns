@@ -2,6 +2,24 @@ import numpy as np
 
 
 class TrajectoryGenerator:
+    """
+    Generate simulated rat trajectories using the rat motion model described in [1]. Code adapted from [2].
+
+    Inputs:
+        sequence_length: Scalar
+            Number of trajectory time steps, can be calculated from T * srate, where T is the duration in seconds and srate the sampling rate in Hz
+        border_region: Scalar
+            Distance to wall in meters
+        box_width: Scalar
+            Width of the artificial box in meters
+        box_heigtht: Scalar
+            Height (in 2D, could also be length) of the artificial box in meters
+        batch_size: Scalar
+            Number of trajectories to generate
+
+    [1] Raudies, F. & Hasselmo, M. E. Modeling boundary vector cell firing given optic flow as a cue. PLoS Computational Biology 8. doi:10.1371/journal.pcbi.1002553 (2012). \n
+    [2] Sorscher, B., Mel, G. C., Ocko, S. A., Giocomo, L. M., & Ganguli, S. (2023). A unified theory for the computational and mechanistic origins of grid cells. Neuron, 111(1), 121-137.
+    """
 
     def __init__(self, sequence_length, border_region, box_width, box_height, batch_size) -> None:
         self.sequence_length = sequence_length
