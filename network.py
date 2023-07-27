@@ -98,11 +98,11 @@ class RNNModel(nn.Module):
 
         T = I.size(2)
         x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double, device=self.device)
-        u = torch.zeros_like(x)
+        u = torch.zeros_like(x, device=self.device)
         y = torch.zeros(self.batch_size, self.output_size, T, device=self.device)
 
         # initialization
-        x[:, :, 0] = self.x0
+        x[:, :, 0] = torch.tensor(self.x0, device=self.device)
         u[:, :, 0] = torch.tanh(x[:, :, 0])
         
         # simulate network
