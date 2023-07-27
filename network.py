@@ -19,6 +19,8 @@ class RNNModel(nn.Module):
     M: Mini-batch size
 
     Inputs:
+        rnn_layer: String {'custom', 'native'}, default: 'native'
+            Type of RNN layer to use. If 'custom' is chosen, the custom layer will be used. Else, PyTorch's native RNN layer will be used.
         l2_rate: Scalar
             Regularization parameter for L2 regularization
         fr_rate: Scalar
@@ -29,7 +31,7 @@ class RNNModel(nn.Module):
             Initial value of the simulation 
     """
 
-    def __init__(self, hidden_size, batch_size, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0):
+    def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0):
         super(RNNModel, self).__init__()
 
         self.input_size = 2 # velocity, head direction
@@ -37,6 +39,7 @@ class RNNModel(nn.Module):
         self.output_size = 2
         self.batch_size = batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+        self.rnn_layer = rnn_layer
 
         # simulation parameters
         self.dt = dt
@@ -44,8 +47,10 @@ class RNNModel(nn.Module):
         self.x0 = x0
 
         # define layers
-        self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
-        # self.rnn = nn.RNN(self.input_size, self.hidden_size, bias=True, batch_first=True)
+        if rnn_layer == 'custom':
+            self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
+        else:
+            self.rnn = nn.RNN(self.input_size, self.hidden_size, bias=True, batch_first=True)
         self.linear = nn.Linear(self.hidden_size, self.output_size, bias=False)
         torch.nn.init.zeros_(self.linear.weight)
 
@@ -80,13 +85,13 @@ class RNNModel(nn.Module):
         E = torch.mean((y_pred - y_true)**2) + self.l2_rate * R_l2 + self.fr_rate * R_fr # minimize error of animal
         return E
 
-    # def forward(self, I):
-    #     u, _ = self.rnn(I)
-    #     y = self.linear(u)
+    def forward_torch_rnn(self, I):
+        u, _ = self.rnn(I)
+        y = self.linear(u)
 
-    #     return u, y
+        return u, y
 
-    def forward(self, I):
+    def forward_custom_rnn(self, I):
         """
         Wrapper function for the simulation of the network.
 

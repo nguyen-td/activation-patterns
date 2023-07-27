@@ -20,6 +20,10 @@ class Trainer:
             Training data
         target_data: (batch_size x 2 x T) Numpy array
             Target data
+        model_name: String
+            Name of the saved model
+        rnn_layer: String {'custom', else}
+            Type of RNN layer to use. If 'custom' is chosen, the custom layer will be used. Else, PyTorch's native RNN layer will be used.
         n_epochs: Scalar
             Number of epochs, default is 100
         mini_batch_size: Scalar
@@ -43,10 +47,11 @@ class Trainer:
     [2] Cueva, C. J., & Wei, X. X. (2018). Emergence of grid-like representations by training recurrent neural networks to perform spatial localization. arXiv preprint arXiv:1803.07770.
     """
 
-    def __init__(self, train_data, target_data, model_name, n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
+    def __init__(self, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
         self.train_data = train_data
         self.target_data = target_data
         self.model_name = model_name
+        self.rnn_layer = rnn_layer
 
         self.batch_size = mini_batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
@@ -66,19 +71,21 @@ class Trainer:
     def train(self):
 
         # make mini-batches
-        # train_data = np.transpose(self.train_data, (0, 2, 1))
-        # target_data = np.transpose(self.target_data, (0, 2, 1))
-        # train_batch = list((chunked(train_data, self.batch_size)))
-        # target_batch = list((chunked(target_data, self.batch_size)))
-        train_batch = list((chunked(self.train_data, self.batch_size)))
-        target_batch = list((chunked(self.target_data, self.batch_size)))
+        if self.rnn_layer == 'native':
+            train_data = np.transpose(self.train_data, (0, 2, 1))
+            target_data = np.transpose(self.target_data, (0, 2, 1))
+            train_batch = list((chunked(train_data, self.batch_size)))
+            target_batch = list((chunked(target_data, self.batch_size)))
+        else:
+            train_batch = list((chunked(self.train_data, self.batch_size)))
+            target_batch = list((chunked(self.target_data, self.batch_size)))
         n_batches = len(train_batch)
 
         model = RNNModel(self.hidden_size, self.batch_size, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
-        error = nn.MSELoss()
+        # error = nn.MSELoss()
         print(model)
 
         train_loss_epochs = np.zeros(self.n_epochs)
@@ -100,9 +107,12 @@ class Trainer:
                 model.zero_grad()
 
                 # forward pass
-                x, u, y = model.forward(train)
-                # u, y = model.forward(train)
-                W_in = model.rnn.W_in
+                if self.rnn_layer == 'custom':
+                    x, u, y = model.forward_custom_rnn(train)
+                    W_in = model.rnn.W_in
+                else:
+                    u, y = model.forward(train)
+                    W_in = model.rnn.weight_ih_l[1]
                 W_out = model.linear.weight
 
                 # compute error
