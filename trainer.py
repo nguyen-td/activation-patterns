@@ -106,7 +106,7 @@ class Trainer:
                 # W_out = model.linear.weight
 
                 # compute error
-                loss = error(y, target)
+                loss = error(y.detach(), target)
                 # loss = model.loss(y.detach(), target, W_in, W_out, u)
                 train_loss += loss.item()
 
