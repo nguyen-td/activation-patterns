@@ -79,7 +79,7 @@ class Trainer:
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
-        # error = nn.MSELoss()
+        error = nn.MSELoss()
         print(model)
 
         train_loss_epochs = np.zeros(self.n_epochs)
@@ -110,7 +110,8 @@ class Trainer:
                 W_out = model.linear.weight
 
                 # compute error
-                loss = model.loss(y, target, W_in, W_out, u)
+                # loss = model.loss(y, target, W_in, W_out, u)
+                loss = error(y, target)
                 train_loss += loss.item()
 
                 # compute gradient and update parameters
