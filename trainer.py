@@ -77,7 +77,7 @@ class Trainer:
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
-        loss = nn.CrossEntropyLoss()
+        error = nn.CrossEntropyLoss()
         print(model)
 
         train_loss_epochs = np.zeros(self.n_epochs)
@@ -105,7 +105,7 @@ class Trainer:
                 # W_out = model.linear.weight
 
                 # compute error
-                loss = loss(y, target)
+                loss = error(y, target)
                 # loss = model.loss(y.detach(), target, W_in, W_out, u)
                 train_loss += loss.item()
 
