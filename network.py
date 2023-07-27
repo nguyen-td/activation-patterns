@@ -80,47 +80,47 @@ class RNNModel(nn.Module):
         E = torch.mean((y_pred - y_true)**2) + self.l2_rate * R_l2 + self.fr_rate * R_fr # minimize error of animal
         return E
 
-    def forward(self, I):
-        u, _ = self.rnn(I)
-        y = self.linear(u)
-
-        return u, y
-
     # def forward(self, I):
-    #     """
-    #     Wrapper function for the simulation of the network.
+    #     u, _ = self.rnn(I)
+    #     y = self.linear(u)
 
-    #     Inputs:
-    #         I: (M x N_in x T) Torch tensor
-    #             Input trajectories
+    #     return u, y
 
-    #     Outputs:
-    #         x: (M x N x T) Torch tensor
-    #             Activation of the units
-    #         u: (M x N x T) Torch tensor
-    #             Firing activitiy of the units
-    #         y: (M x N_out x T) Torch tensor
-    #             Output of the network
-    #     """
+    def forward(self, I):
+        """
+        Wrapper function for the simulation of the network.
 
-    #     T = I.size(2)
-    #     x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double, device=self.device)
-    #     u = torch.zeros_like(x, device=self.device)
-    #     y = torch.zeros(self.batch_size, self.output_size, T, device=self.device)
+        Inputs:
+            I: (M x N_in x T) Torch tensor
+                Input trajectories
 
-    #     # initialization
-    #     x[:, :, 0] = torch.tensor(self.x0, device=self.device)
-    #     u[:, :, 0] = torch.tanh(x[:, :, 0])
+        Outputs:
+            x: (M x N x T) Torch tensor
+                Activation of the units
+            u: (M x N x T) Torch tensor
+                Firing activitiy of the units
+            y: (M x N_out x T) Torch tensor
+                Output of the network
+        """
+
+        T = I.size(2)
+        x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double, device=self.device)
+        u = torch.zeros_like(x, device=self.device)
+        y = torch.zeros(self.batch_size, self.output_size, T, device=self.device)
+
+        # initialization
+        x[:, :, 0] = torch.tensor(self.x0, device=self.device)
+        u[:, :, 0] = torch.tanh(x[:, :, 0])
         
-    #     # simulate network
-    #     for t in range(T):
-    #         x[:, :, t+1], u[:, :, t+1] = self.rnn.forward_euler(x[:, :, t], I[:, :, t], self.dt, self.tau)
-    #         y[:, :, t] = self.linear(u[:, :, t+1])
+        # simulate network
+        for t in range(T):
+            x[:, :, t+1], u[:, :, t+1] = self.rnn.forward_euler(x[:, :, t], I[:, :, t], self.dt, self.tau)
+            y[:, :, t] = self.linear(u[:, :, t+1])
         
-    #     # drop last time step
-    #     x = x[:, :, :-1]
-    #     u = u[:, :, :-1]
-    #     return x, u, y
+        # drop last time step
+        x = x[:, :, :-1]
+        u = u[:, :, :-1]
+        return x, u, y
     
     def evaluate(self, input_test, target_test):
         """
