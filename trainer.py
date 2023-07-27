@@ -102,12 +102,12 @@ class Trainer:
                 # forward pass
                 x, u, y = model.forward(train)
                 # u, y = model.forward(train)
-                # W_in = model.rnn.W_in
-                # W_out = model.linear.weight
+                W_in = model.rnn.W_in
+                W_out = model.linear.weight
 
                 # compute error
-                loss = error(y.detach(), target)
-                # loss = model.loss(y.detach(), target, W_in, W_out, u)
+                # loss = error(y.detach(), target) # maybe this is the issue?
+                loss = model.loss(y.detach(), target, W_in, W_out, u)
                 train_loss += loss.item()
 
                 # compute gradient and update parameters
