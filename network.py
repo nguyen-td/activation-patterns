@@ -153,14 +153,13 @@ class RNNModel(nn.Module):
             target_data = np.transpose(target_test, (0, 2, 1))
             input_batch = list((chunked(input_data, self.batch_size)))
             target_batch = list((chunked(target_data, self.batch_size)))
-        n_batches = len(input_test)
+        n_batches = len(input_batch)
         n_data = input_test.shape[0]
 
         start = time.time()
         aggregate_loss = 0
 
         y_pred = list()
-        print(len(input_batch))
         with torch.no_grad():
             print('Start evaluation run: ')
             for batch in range(n_batches):
