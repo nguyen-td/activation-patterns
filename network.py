@@ -195,8 +195,8 @@ class RNNModel(nn.Module):
             print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
 
             # get prediction
-            y_list = [item for sublist in y_pred for item in sublist]
-            y_pred = y_list[:n_data].cpu().numpy()
+            y_list = [item for sublist in y_pred.detach().cpu().numpy() for item in sublist]
+            y_pred = y_list[:n_data]
 
         return aggregate_loss, y_pred
 
