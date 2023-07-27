@@ -141,15 +141,9 @@ class RNNModel(nn.Module):
         """
 
         # make mini-batches
-        if self.rnn_layer == 'custom':
-            input_batch = list((chunked(input_test, self.batch_size)))
-            target_batch = list((chunked(target_test, self.batch_size)))
-            
-        else:
-            input_data = np.transpose(input_test, (0, 2, 1))
-            target_data = np.transpose(target_test, (0, 2, 1))
-            input_batch = list((chunked(input_data, self.batch_size)))
-            target_batch = list((chunked(target_data, self.batch_size)))
+        input_batch = list((chunked(input_test, self.batch_size)))
+        target_batch = list((chunked(target_test, self.batch_size)))
+        
         n_batches = len(input_batch)
         n_data = input_test.shape[0]
 
