@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 import time
+import os
 from pathlib import Path
 from more_itertools import chunked
 
@@ -110,10 +111,13 @@ class Trainer:
             train_loss_epochs[epoch] = train_loss
             end = time.time()
 
-            model_save_name = Path('models') / f'{self.model_name}-model.pt'
-            torch.save(model, model_save_name)
-
             print(f"Training loss: {train_loss}  {round(end - start, 3)} seconds for this epoch \n")
+
+        save_folder = 'models'
+        if not os.path.isdir(save_folder):
+            os.mkdir(save_folder)
+        model_save_name = Path('models') / f'{self.model_name}-model.pt'
+        torch.save(model, model_save_name)
 
         return train_loss_epochs
 
