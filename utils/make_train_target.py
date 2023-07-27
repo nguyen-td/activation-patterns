@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def make_train_test(position, velocity, head_dir):
+def make_train_target(position, velocity, head_dir):
     """
     Make training and target (ground truth) data from simulated inputs, e.g., from simulated rat trajectories.
 

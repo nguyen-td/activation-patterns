@@ -1,6 +1,6 @@
 from trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
-from utils.make_train_test import make_train_test
+from utils.make_train_target import make_train_target
 
 # generate training data
 T = 20  # duration of simulated trajectories (seconds)
@@ -16,7 +16,7 @@ n_data = 100
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
-train, target = make_train_test(position, velocity, head_dir)
+train, target = make_train_target(position, velocity, head_dir)
 
 # start training
 trainer = Trainer(train, target, n_epochs=3)

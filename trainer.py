@@ -1,16 +1,12 @@
 import torch
-import torch.nn as nn
 import torch.optim as optim
-from torch import autograd
 import numpy as np
 import time
-import sys
-
+from pathlib import Path
 from more_itertools import chunked
-from matplotlib import pyplot as plt
 
 from network import RNNModel
-from trajectory_generator import TrajectoryGenerator
+from utils.batch_padding import batch_padding
 
 
 class Trainer:
@@ -30,72 +26,49 @@ class Trainer:
             Number of hidden neurons, default is 100
         learning_rate: Scalar
             Learning rate of the optimization algorithm (e.g., RMSprop), default is 1e-4 as in [1]
-        l2: Scalar
+        l2_rate: Scalar
             Regularization parameter for L2 regularization, default is 1e-4 as in [2]
-        l_fr: Scalar
+        fr_rate: Scalar
             Regularization parameter for the metabolic cost, default is 1e-4
+        dt: Scalar
+            Step size
+        tau: Scalar
+            Time scale of decay
+        x0: Scalar
+            Initial value of the simulation
 
     [1] Sorscher, B., Mel, G. C., Ocko, S. A., Giocomo, L. M., & Ganguli, S. (2023). A unified theory for the computational and mechanistic origins of grid cells. Neuron, 111(1), 121-137. \n
     [2] Cueva, C. J., & Wei, X. X. (2018). Emergence of grid-like representations by training recurrent neural networks to perform spatial localization. arXiv preprint arXiv:1803.07770.
     """
 
-    def __init__(self, train_data, target_data, n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, x0=0) -> None:
+    def __init__(self, train_data, target_data, model_name, n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
         self.train_data = train_data
         self.target_data = target_data
+        self.model_name = model_name
 
-        self.mini_batch_size = mini_batch_size
+        self.batch_size = mini_batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
+        # model parameters
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
         self.l2_rate = l2_rate
         self.fr_rate = fr_rate
         self.n_epochs = n_epochs
+
+        # simulation parameters
         self.x0 = x0
-
-    def batch_padding(self, train, target):
-        """
-        Add padding to input data during mini-batch training by randomly sample data points without replacement. This is generally applied to the last batch
-        where the actual number of data points is smaller than the batch size. This can happen when the number of data points is not evenly divisible by the
-        selected mini-batch size.
-
-        M: mini-batch size
-
-        Input:
-            train: (n_dat x 2 x T) Torch tensor, where n_dat <= M
-                Training data
-            target: (n_dat x 2 x T) Torch tensor, where n_dat <= M
-                Target data
-        Output:
-            train_new: (M x 2 x T) Torch tensor
-                Training data, padded to match the mini-batch size
-            target_new: (M x 2 x T) Torch tensor
-                Target data, padded to match the mini-batch size
-        """
-        
-        # shuffling
-        diff = self.mini_batch_size - train.size(0)
-        shuf_inds = torch.randperm(train.size(0))
-        train_shuf = train[shuf_inds]
-        target_shuf = target[shuf_inds]
-
-        # draw without replacement and pad data
-        train_pad = train_shuf[:diff]
-        target_pad = target_shuf[:diff]
-        train_new = torch.cat([train, train_pad], dim=0)
-        target_new = torch.cat([target, target_pad], dim=0)
-        
-        return train_new, target_new
+        self.dt = dt 
+        self.tau = tau
 
     def train(self):
 
         # make mini-batches
-        n_data = self.train_data.shape[0]
-        train_batch = list((chunked(self.train_data, self.mini_batch_size)))
-        target_batch = list((chunked(self.target_data, self.mini_batch_size)))
+        train_batch = list((chunked(self.train_data, self.batch_size)))
+        target_batch = list((chunked(self.target_data, self.batch_size)))
         n_batches = len(train_batch)
 
-        model = RNNModel(self.hidden_size, self.mini_batch_size)
+        model = RNNModel(self.hidden_size, self.batch_size, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
@@ -113,19 +86,19 @@ class Trainer:
                 target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
                 # pad data if the number of data points is smaller than the selected mini-batch size
-                if train.size(0) < self.mini_batch_size:
-                    train, target = self.batch_padding(train, target)
+                if train.size(0) < self.batch_size:
+                    train, target = batch_padding(train, target, self.batch_size)
 
                 # clear out gradients
                 model.zero_grad()
 
                 # forward pass
-                x, u, y = model.forward(train, self.x0)
+                x, u, y = model.forward(train)
                 W_in = model.rnn.W_in
                 W_out = model.linear.weight
 
                 # compute error
-                loss = model.loss(y.detach(), target, W_in, W_out, u, self.l2_rate, self.fr_rate)
+                loss = model.loss(y.detach(), target, W_in, W_out, u)
                 train_loss += loss.item()
 
                 # compute gradient and update parameters
@@ -137,9 +110,12 @@ class Trainer:
             train_loss_epochs[epoch] = train_loss
             end = time.time()
 
+            model_save_name = Path('models') / f'{self.model_name}-model.pt'
+            torch.save(model, model_save_name)
+
             print(f"Training loss: {train_loss}  {round(end - start, 3)} seconds for this epoch \n")
 
-        return train_loss
+        return train_loss_epochs
 
 
 

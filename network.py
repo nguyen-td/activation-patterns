@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
+import time
+import numpy as np
+from more_itertools import chunked
+
 from rnn_layer import RNNLayer
+from utils.batch_padding import batch_padding
 
 
 class RNNModel(nn.Module):
@@ -12,24 +17,41 @@ class RNNModel(nn.Module):
     N_out: Number of output neurons
     T: Sequence length
     M: Mini-batch size
+
+    Inputs:
+        l2_rate: Scalar
+            Regularization parameter for L2 regularization
+        fr_rate: Scalar
+            Regularization parameter for the metabolic cost
+        tau: Scalar
+            Time scale of decay
+        x0: Scalar
+            Initial value of the simulation 
     """
 
-    def __init__(self, hidden_size, batch_size, dt=0.02, tau=0.1):
+    def __init__(self, hidden_size, batch_size, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0):
         super(RNNModel, self).__init__()
 
         self.input_size = 2 # velocity, head direction
         self.hidden_size = hidden_size
         self.output_size = 2
         self.batch_size = batch_size
+
+        # simulation parameters
         self.dt = dt
         self.tau = tau
+        self.x0 = x0
 
         # define layers
         self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
         self.linear = nn.Linear(self.hidden_size, self.output_size, bias=False)
         torch.nn.init.zeros_(self.linear.weight)
 
-    def loss(self, y_pred, y_true, W_in, W_out, u, l_l2, l_fr):
+        # loss function parameters
+        self.l2_rate = l2_rate
+        self.fr_rate = fr_rate
+
+    def loss(self, y_pred, y_true, W_in, W_out, u):
         """
         Compute loss by minimizing the MSE between target and prediction while also minimizing the metabolic 
         cost and penalizing large network parameters (L2 weight decay).
@@ -45,10 +67,6 @@ class RNNModel(nn.Module):
                 Hidden-to-output weight matrix
             u: (M x N x T) Torch tensor
                 Firing activity of the units
-            l2: Scalar
-                Regularization parameter for L2 regularization
-            l_fr: Scalar
-                Regularization parameter for the metabolic cost
         
         Output:
             E: Torch scalar 
@@ -57,18 +75,16 @@ class RNNModel(nn.Module):
 
         R_l2 = torch.mean(W_in**2) + torch.mean(W_out**2) # L2 regularization 
         R_fr = torch.mean(u**2) # minimize metabolic cost
-        E = torch.mean((y_pred - y_true)**2) + l_l2 * R_l2 + l_fr * R_fr # minimize error of animal
+        E = torch.mean((y_pred - y_true)**2) + self.l2_rate * R_l2 + self.fr_rate * R_fr # minimize error of animal
         return E
 
-    def forward(self, I, x0):
+    def forward(self, I):
         """
-        Simulation of the network.
+        Wrapper function for the simulation of the network.
 
         Inputs:
             I: (M x N_in x T) Torch tensor
                 Input trajectories
-            x0: Scalar
-                Initial value of the simulation 
 
         Outputs:
             x: (M x N x T) Torch tensor
@@ -85,7 +101,7 @@ class RNNModel(nn.Module):
         y = torch.zeros(self.batch_size, self.output_size, T)
 
         # initialization
-        x[:, :, 0] = x0
+        x[:, :, 0] = self.x0
         u[:, :, 0] = torch.tanh(x[:, :, 0])
         
         # simulate network
@@ -97,3 +113,68 @@ class RNNModel(nn.Module):
         x = x[:, :, :-1]
         u = u[:, :, :-1]
         return x, u, y
+    
+    def evaluate(self, input_test, target_test):
+        """
+        Run the trained model on test data to path integrate from velocity and head direction inputs. 
+
+        Inputs:
+            input_test: (n_dat x N_in x T) Torch tensor
+                Input trajectories
+            target_test: (n_dat x_out x T) Torch tensor
+                Target output trajectories
+        Outputs:
+            aggregate_loss: Scalar
+                Aggregated loss
+            y_pred: (n_dat x N_out x T) Torch tensoor
+                Predicted output trajectories
+        """
+
+        # make mini-batches
+        input_batch = list((chunked(input_test, self.batch_size)))
+        target_batch = list((chunked(target_test, self.batch_size)))
+        n_data = input_test.shape[0]
+        n_batches = len(input_batch)
+
+        start = time.time()
+        aggregate_loss = 0
+
+        y_pred = list()
+        with torch.no_grad():
+            print('Start evaluation run: ')
+            for batch in range(n_batches):
+                print('.', end='')
+
+                # set up data
+                input = torch.as_tensor(np.array(input_batch[batch]))
+                target = torch.as_tensor(np.array(target_batch[batch]))
+
+                # pad data if the number of data points is smaller than the selected mini-batch size
+                if input.size(0) < self.batch_size:
+                    input, target = batch_padding(input, target, self.batch_size)
+
+                # forward pass
+                x, u, y = self.forward(input)
+                W_in = self.rnn.W_in
+                W_out = self.linear.weight
+
+                # compute error
+                loss = self.loss(y, target, W_in, W_out, u)
+                aggregate_loss += loss.item()
+
+                # save prediction
+                y_pred.append(y)
+
+            aggregate_loss /= n_batches
+            end = time.time()
+            print("\n")
+            print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
+
+            # get prediction
+            y_list = [item for sublist in y_pred for item in sublist]
+            y_pred = y_list[:n_data]
+
+        return aggregate_loss, y_pred
+
+
+            
