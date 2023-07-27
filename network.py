@@ -85,7 +85,7 @@ class RNNModel(nn.Module):
         E = torch.mean((y_pred - y_true)**2) + self.l2_rate * R_l2 + self.fr_rate * R_fr # minimize error of animal
         return E
 
-    def forward_torch_rnn(self, I):
+    def forward_native_rnn(self, I):
         u, _ = self.rnn(I)
         y = self.linear(u)
 

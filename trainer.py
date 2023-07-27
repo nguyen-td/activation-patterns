@@ -71,14 +71,15 @@ class Trainer:
     def train(self):
 
         # make mini-batches
-        if self.rnn_layer == 'native':
+        if self.rnn_layer == 'custom':
+            train_batch = list((chunked(self.train_data, self.batch_size)))
+            target_batch = list((chunked(self.target_data, self.batch_size)))
+            
+        else:
             train_data = np.transpose(self.train_data, (0, 2, 1))
             target_data = np.transpose(self.target_data, (0, 2, 1))
             train_batch = list((chunked(train_data, self.batch_size)))
             target_batch = list((chunked(target_data, self.batch_size)))
-        else:
-            train_batch = list((chunked(self.train_data, self.batch_size)))
-            target_batch = list((chunked(self.target_data, self.batch_size)))
         n_batches = len(train_batch)
 
         model = RNNModel(self.hidden_size, self.batch_size, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
@@ -111,7 +112,7 @@ class Trainer:
                     x, u, y = model.forward_custom_rnn(train)
                     W_in = model.rnn.W_in
                 else:
-                    u, y = model.forward(train)
+                    u, y = model.forward_native_rnn(train)
                     W_in = model.rnn.weight_ih_l[1]
                 W_out = model.linear.weight
 
