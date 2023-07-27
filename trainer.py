@@ -118,7 +118,7 @@ class Trainer:
 
                 # compute error
                 # loss = error(y.detach(), target) # maybe this is the issue?
-                loss = model.loss(y.detach(), target, W_in, W_out, u)
+                loss = model.loss(y, target, W_in, W_out, u)
                 train_loss += loss.item()
 
                 # compute gradient and update parameters
