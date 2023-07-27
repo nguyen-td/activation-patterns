@@ -160,13 +160,13 @@ class RNNModel(nn.Module):
         aggregate_loss = 0
 
         y_pred = list()
+        len(input_batch)
         with torch.no_grad():
             print('Start evaluation run: ')
             for batch in range(n_batches):
                 print('.', end='')
 
                 # set up data
-                print(batch)
                 input = torch.as_tensor(np.array(input_batch[batch]), device=self.device)
                 target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
