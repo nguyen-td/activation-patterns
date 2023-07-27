@@ -36,6 +36,7 @@ class RNNModel(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = 2
         self.batch_size = batch_size
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
         # simulation parameters
         self.dt = dt
@@ -96,9 +97,9 @@ class RNNModel(nn.Module):
         """
 
         T = I.size(2)
-        x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double)
+        x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double, device=self.device)
         u = torch.zeros_like(x)
-        y = torch.zeros(self.batch_size, self.output_size, T)
+        y = torch.zeros(self.batch_size, self.output_size, T, device=self.device)
 
         # initialization
         x[:, :, 0] = self.x0
@@ -146,8 +147,8 @@ class RNNModel(nn.Module):
                 print('.', end='')
 
                 # set up data
-                input = torch.as_tensor(np.array(input_batch[batch]))
-                target = torch.as_tensor(np.array(target_batch[batch]))
+                input = torch.as_tensor(np.array(input_batch[batch]), device=self.device)
+                target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
                 # pad data if the number of data points is smaller than the selected mini-batch size
                 if input.size(0) < self.batch_size:
