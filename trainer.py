@@ -113,7 +113,7 @@ class Trainer:
                     W_in = model.rnn.W_in
                 else:
                     u, y = model.forward_native_rnn(train)
-                    W_in = model.rnn.weight_ih_l1
+                    W_in = model.rnn.weight_ih_l0
                 W_out = model.linear.weight
 
                 # compute error
