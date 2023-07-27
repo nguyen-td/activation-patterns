@@ -66,8 +66,11 @@ class Trainer:
     def train(self):
 
         # make mini-batches
-        train_batch = list((chunked(self.train_data, self.batch_size)))
-        target_batch = list((chunked(self.target_data, self.batch_size)))
+        train_data = np.transpose(self.train_data, (0, 2, 1))
+        target_data = np.transpose(self.target_data, (0, 2, 1))
+
+        train_batch = list((chunked(train_data, self.batch_size)))
+        target_batch = list((chunked(target_data, self.batch_size)))
         n_batches = len(train_batch)
 
         model = RNNModel(self.hidden_size, self.batch_size, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
