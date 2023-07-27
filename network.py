@@ -196,7 +196,7 @@ class RNNModel(nn.Module):
 
             # get prediction
             y_list = [item for sublist in y_pred for item in sublist]
-            y_pred = y_list[:n_data].detach().cpu().numpy()
+            y_pred = y_list[:n_data].cpu().numpy()
 
         return aggregate_loss, y_pred
 
