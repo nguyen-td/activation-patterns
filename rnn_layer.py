@@ -19,6 +19,8 @@ class RNNLayer(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.batch_size = batch_size
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+
 
         # initialize trainable parameters according to Cueva & Wei, 2018
         W_in = torch.empty(self.hidden_size, self.input_size)
@@ -29,7 +31,7 @@ class RNNLayer(nn.Module):
         self.W_in = nn.Parameter(W_in)
         self.W_rec = nn.Parameter(W_rec)
         self.b = nn.Parameter(torch.zeros(self.hidden_size, 1))
-        self.xi = torch.normal(mean = 0, std = torch.full((self.hidden_size, 1), 1 / self.input_size)) # not trained
+        self.xi = torch.normal(mean = 0, std = torch.full((self.hidden_size, 1), 1 / self.input_size), device=self.device) # not trained
 
     def rnn_dynamics(self, x, I, tau):
         """
