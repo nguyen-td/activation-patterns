@@ -44,8 +44,8 @@ class RNNModel(nn.Module):
         self.x0 = x0
 
         # define layers
-        # self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
-        self.rnn = nn.RNN(self.input_size, self.hidden_size, bias=True, batch_first=True)
+        self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
+        # self.rnn = nn.RNN(self.input_size, self.hidden_size, bias=True, batch_first=True)
         self.linear = nn.Linear(self.hidden_size, self.output_size, bias=False)
         torch.nn.init.zeros_(self.linear.weight)
 
