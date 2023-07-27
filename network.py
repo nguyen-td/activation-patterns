@@ -166,6 +166,7 @@ class RNNModel(nn.Module):
                 print('.', end='')
 
                 # set up data
+                print(batch)
                 input = torch.as_tensor(np.array(input_batch[batch]), device=self.device)
                 target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
