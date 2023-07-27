@@ -144,10 +144,17 @@ class RNNModel(nn.Module):
         """
 
         # make mini-batches
-        input_batch = list((chunked(input_test, self.batch_size)))
-        target_batch = list((chunked(target_test, self.batch_size)))
+        if self.rnn_layer == 'custom':
+            input_batch = list((chunked(input_test, self.batch_size)))
+            target_batch = list((chunked(target_test, self.batch_size)))
+            
+        else:
+            input_data = np.transpose(input_test, (0, 2, 1))
+            target_data = np.transpose(target_test, (0, 2, 1))
+            input_batch = list((chunked(input_data, self.batch_size)))
+            target_batch = list((chunked(target_data, self.batch_size)))
+        n_batches = len(input_test)
         n_data = input_test.shape[0]
-        n_batches = len(input_batch)
 
         start = time.time()
         aggregate_loss = 0
@@ -166,9 +173,13 @@ class RNNModel(nn.Module):
                 if input.size(0) < self.batch_size:
                     input, target = batch_padding(input, target, self.batch_size)
 
-                # forward pass
-                x, u, y = self.forward(input)
-                W_in = self.rnn.W_in
+              # forward pass
+                if self.rnn_layer == 'custom':
+                    x, u, y = self.forward_custom_rnn(input)
+                    W_in = self.rnn.W_in
+                else:
+                    u, y = self.forward_native_rnn(input)
+                    W_in = self.rnn.weight_ih_l0
                 W_out = self.linear.weight
 
                 # compute error
