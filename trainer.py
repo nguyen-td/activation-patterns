@@ -82,7 +82,7 @@ class Trainer:
             target_batch = list((chunked(target_data, self.batch_size)))
         n_batches = len(train_batch)
 
-        model = RNNModel(self.hidden_size, self.batch_size, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
+        model = RNNModel(self.hidden_size, self.batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
@@ -117,7 +117,6 @@ class Trainer:
                 W_out = model.linear.weight
 
                 # compute error
-                # loss = error(y.detach(), target) # maybe this is the issue?
                 loss = model.loss(y, target, W_in, W_out, u)
                 train_loss += loss.item()
 
