@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 import torch.optim as optim
 import numpy as np
 import time
@@ -73,6 +74,7 @@ class Trainer:
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
+        loss = nn.CrossEntropyLoss()
         print(model)
 
         train_loss_epochs = np.zeros(self.n_epochs)
@@ -94,12 +96,14 @@ class Trainer:
                 model.zero_grad()
 
                 # forward pass
-                x, u, y = model.forward(train)
-                W_in = model.rnn.W_in
-                W_out = model.linear.weight
+                # x, u, y = model.forward(train)
+                u, y = model.forward(train)
+                # W_in = model.rnn.W_in
+                # W_out = model.linear.weight
 
                 # compute error
-                loss = model.loss(y.detach(), target, W_in, W_out, u)
+                loss = model.loss(y, target)
+                # loss = model.loss(y.detach(), target, W_in, W_out, u)
                 train_loss += loss.item()
 
                 # compute gradient and update parameters
