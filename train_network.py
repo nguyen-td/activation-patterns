@@ -19,5 +19,6 @@ position, velocity, head_dir = trajectory_generator.generate_trajectory()
 train, target = make_train_target(position, velocity, head_dir)
 
 # start training
-trainer = Trainer(train, target, n_epochs=3)
+model_name = 'RNN-100'
+trainer = Trainer(train, target, model_name, rnn_layer='custom', n_epochs=10,)
 trainer.train()

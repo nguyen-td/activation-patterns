@@ -125,7 +125,7 @@ class RNNModel(nn.Module):
         # drop last time step
         x = x[:, :, :-1]
         u = u[:, :, :-1]
-        return x, u, y
+        return x, u.detach(), y
     
     def evaluate(self, input_test, target_test):
         """
