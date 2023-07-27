@@ -58,8 +58,8 @@ class RNNLayer(nn.Module):
         xi = self.xi
         xi = torch.t(xi.expand(-1, self.batch_size)).double()
 
+        x = 1 / tau * (-x + torch.matmul(torch.tanh(x), self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
         u = torch.tanh(x)
-        x = 1 / tau * (-x + torch.matmul(u, self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
 
         return x, u
 

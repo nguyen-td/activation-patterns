@@ -64,15 +64,15 @@ class RNNModel(nn.Module):
         cost and penalizing large network parameters (L2 weight decay).
 
         Inputs:
-            y_pred: (M x N_out x T) Torch tensor
+            y_pred: (M x T x N_out) Torch tensor
                 Output of the network
-            y_true: (M x N_out x T) Torch tensor
+            y_true: (M x T x N_out) Torch tensor
                 Ground truth targets
             W_in: (N x N_in) Torch tensor
                 Hidden-to-input weight matrix
             W_out: (N_out x N) Torch tensor
                 Hidden-to-output weight matrix
-            u: (M x N x T) Torch tensor
+            u: (M x T x N) Torch tensor
                 Firing activity of the units
         
         Output:
@@ -96,50 +96,47 @@ class RNNModel(nn.Module):
         Wrapper function for the simulation of the network.
 
         Inputs:
-            I: (M x N_in x T) Torch tensor
+            I: (M x T x N_in) Torch tensor
                 Input trajectories
 
         Outputs:
-            x: (M x N x T) Torch tensor
+            x: (M x T x N) Torch tensor
                 Activation of the units
-            u: (M x N x T) Torch tensor
+            u: (M x T x N) Torch tensor
                 Firing activitiy of the units
-            y: (M x N_out x T) Torch tensor
+            y: (M x T x N_out) Torch tensor
                 Output of the network
         """
 
-        T = I.size(2)
-        x = torch.zeros(self.batch_size, self.hidden_size, T + 1, dtype=torch.double, device=self.device)
+        T = I.size(1)
+        x = torch.zeros(self.batch_size, T, self.hidden_size, dtype=torch.double, device=self.device)
         u = torch.zeros_like(x, device=self.device)
-        y = torch.zeros(self.batch_size, self.output_size, T, device=self.device)
+        y = torch.zeros(self.batch_size, T, self.output_size, device=self.device)
 
         # initialization
-        x[:, :, 0] = torch.tensor(self.x0, device=self.device)
-        u[:, :, 0] = torch.tanh(x[:, :, 0])
+        x[:, 0, :] = torch.tensor(self.x0, device=self.device)
+        u[:, 0, :] = torch.tanh(x[:, 0, :])
         
         # simulate network
-        for t in range(T):
-            x[:, :, t+1], u[:, :, t+1] = self.rnn.forward_euler(x[:, :, t], I[:, :, t], self.dt, self.tau)
-            y[:, :, t] = self.linear(u[:, :, t+1])
+        for t in range(T-1):
+            x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
+        y = self.linear(u)
         
-        # drop last time step
-        x = x[:, :, :-1]
-        u = u[:, :, :-1]
-        return x, u.detach(), y
+        return x, u, y
     
     def evaluate(self, input_test, target_test):
         """
         Run the trained model on test data to path integrate from velocity and head direction inputs. 
 
         Inputs:
-            input_test: (n_dat x N_in x T) Torch tensor
+            input_test: (n_dat x T x N_in) Torch tensor
                 Input trajectories
-            target_test: (n_dat x_out x T) Torch tensor
+            target_test: (n_dat x T x N_out) Torch tensor
                 Target output trajectories
         Outputs:
             aggregate_loss: Scalar
                 Aggregated loss
-            y_pred: (n_dat x N_out x T) Torch tensoor
+            y_pred: (n_dat x T x N_out) Torch tensoor
                 Predicted output trajectories
         """
 

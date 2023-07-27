@@ -16,9 +16,9 @@ class Trainer:
     Train a recurrent neural network and optimize it using backpropagation. 
 
     Inputs:
-        train_data: (batch_size x 2 x T) Numpy array
+        train_data: (batch_size x T x 2) Numpy array
             Training data
-        target_data: (batch_size x 2 x T) Numpy array
+        target_data: (batch_size x T x 2) Numpy array
             Target data
         model_name: String
             Name of the saved model
@@ -71,15 +71,8 @@ class Trainer:
     def train(self):
 
         # make mini-batches
-        if self.rnn_layer == 'custom':
-            train_batch = list((chunked(self.train_data, self.batch_size)))
-            target_batch = list((chunked(self.target_data, self.batch_size)))
-            
-        else:
-            train_data = np.transpose(self.train_data, (0, 2, 1))
-            target_data = np.transpose(self.target_data, (0, 2, 1))
-            train_batch = list((chunked(train_data, self.batch_size)))
-            target_batch = list((chunked(target_data, self.batch_size)))
+        train_batch = list((chunked(self.train_data, self.batch_size)))
+        target_batch = list((chunked(self.target_data, self.batch_size)))
         n_batches = len(train_batch)
 
         model = RNNModel(self.hidden_size, self.batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)

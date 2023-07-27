@@ -1,6 +1,6 @@
 from trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
-from utils.make_train_target import make_train_target
+from utils.make_train_target import make_train_data
 
 # generate training data
 T = 20  # duration of simulated trajectories (seconds)
@@ -16,9 +16,9 @@ n_data = 100
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
-train, target = make_train_target(position, velocity, head_dir)
+train = make_train_data(velocity, head_dir)
 
 # start training
 model_name = 'RNN-100'
-trainer = Trainer(train, target, model_name, rnn_layer='custom', n_epochs=10,)
+trainer = Trainer(train, position, model_name, rnn_layer='custom', n_epochs=10)
 trainer.train()
