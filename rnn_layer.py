@@ -31,7 +31,7 @@ class RNNLayer(nn.Module):
         self.W_in = nn.Parameter(W_in)
         self.W_rec = nn.Parameter(W_rec)
         self.b = nn.Parameter(torch.zeros(self.hidden_size, 1))
-        self.xi = torch.normal(mean = 0, std = torch.full((self.hidden_size, 1), 1 / self.input_size), device=self.device) # not trained
+        self.xi = torch.normal(mean = 0, std = torch.full((self.hidden_size, 1), 1 / self.input_size)).to(device=self.device) # not trained
 
     def rnn_dynamics(self, x, I, tau):
         """
