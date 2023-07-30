@@ -81,6 +81,11 @@ class Trainer:
         model.to(self.device)
         print(model)
 
+        # save parameters
+        save_folder = 'models'
+        if not os.path.isdir(save_folder):
+            os.mkdir(save_folder)
+
         train_loss_epochs = np.zeros(self.n_epochs)
         for epoch in range(self.n_epochs):
             print(f"Epoch {epoch+1}\n-------------------------------")
@@ -92,7 +97,8 @@ class Trainer:
                 train = torch.as_tensor(np.array(train_batch[batch]), device=self.device)
                 target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
-                # pad data if the number of data points is smaller than the selected mini-batch size
+                # pad data if the number of dat a points is smaller than the selected mini-batch size
+                # FIXME: fix this by resampling from the whole data set
                 if train.size(0) < self.batch_size:
                     train, target = batch_padding(train, target, self.batch_size)
 
@@ -123,9 +129,10 @@ class Trainer:
 
             print(f"Training loss: {train_loss}  {round(end - start, 3)} seconds for this epoch \n")
 
-        save_folder = 'models'
-        if not os.path.isdir(save_folder):
-            os.mkdir(save_folder)
+            # save in-between
+            model_save_name = Path('models') / f'{self.model_name}-{epoch}-model.pt'
+            torch.save(model, model_save_name)
+
         model_save_name = Path('models') / f'{self.model_name}-model.pt'
         torch.save(model, model_save_name)
 
