@@ -4,7 +4,7 @@ import time
 import numpy as np
 from more_itertools import chunked
 
-from rnn_layer import RNNLayer
+from network.rnn_layer import RNNLayer
 from utils.batch_padding import batch_padding
 
 

@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from more_itertools import chunked
 
-from network import RNNModel
+from network.network import RNNModel
 from utils.batch_padding import batch_padding
 
 
