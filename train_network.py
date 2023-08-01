@@ -24,7 +24,7 @@ torch.save(position, Path('models/y_true_train.pt'))
 train = make_train_data(velocity, head_dir)
 
 # # start training
-hidden_size = 256
+hidden_size = 512
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
