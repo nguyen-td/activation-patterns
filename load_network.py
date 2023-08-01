@@ -2,6 +2,7 @@ import torch
 from pathlib import Path
 
 from trajectory_generator import TrajectoryGenerator
+from network.network import RNNModel
 from utils.make_train_data import make_train_data
 
 # generate test data
@@ -21,6 +22,7 @@ test = make_train_data(velocity, head_dir)
 # load and evaluate model
 hidden_size = 256
 rnn_layer = 'custom'
+model = RNNModel()
 rnn_model = torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
 aggregate_loss, y_pred = rnn_model.evaluate(test, position)
 
