@@ -22,7 +22,6 @@ test = make_train_data(velocity, head_dir)
 # load and evaluate model
 hidden_size = 256
 rnn_layer = 'custom'
-model = RNNModel()
 rnn_model = torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
 aggregate_loss, y_pred = rnn_model.evaluate(test, position)
 
