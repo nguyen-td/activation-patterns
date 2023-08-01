@@ -74,6 +74,7 @@ class Trainer:
         train_batch = list((chunked(self.train_data, self.batch_size)))
         target_batch = list((chunked(self.target_data, self.batch_size)))
         n_batches = len(train_batch)
+        n_data = self.train_data.shape[0]
 
         model = RNNModel(self.hidden_size, self.batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
         model.double()
@@ -87,6 +88,8 @@ class Trainer:
             os.mkdir(save_folder)
 
         train_loss_epochs = np.zeros(self.n_epochs)
+        y_pred = list()
+        x_train = list()
         for epoch in range(self.n_epochs):
             print(f"Epoch {epoch+1}\n-------------------------------")
 
@@ -123,6 +126,11 @@ class Trainer:
                 optimizer.step()
                 print(f"loss: {loss.item()}")
 
+                # save prediction and model activity in the last iteration
+                if epoch == (self.n_epochs - 1):
+                    y_pred.append(y.detach().cpu().numpy())
+                    x_train.append(x.detach().cpu().numpy())
+
             train_loss /= n_batches
             train_loss_epochs[epoch] = train_loss
             end = time.time()
@@ -133,8 +141,18 @@ class Trainer:
             model_save_name = Path('models') / f'{self.model_name}-{epoch}-model.pt'
             torch.save(model, model_save_name)
 
+        # save stuff
+        y_pred = [item for sublist in y_pred for item in sublist]
+        y_pred = np.array(y_pred[:n_data])
+        x_train = [item for sublist in x_train for item in sublist]
+        x_train = np.array(x_train[:n_data])
+
         model_save_name = Path('models') / f'{self.model_name}-model.pt'
+        y_pred_save_name = Path('models/y_pred_train.pt')
+        x_train_save_name = Path('models/x_train.pt')
         torch.save(model, model_save_name)
+        torch.save(y_pred, y_pred_save_name)
+        torch.save(x_train, x_train_save_name)
 
         return train_loss_epochs
 

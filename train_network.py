@@ -1,6 +1,7 @@
 import torch
 print(torch.cuda.is_available())
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 from trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
@@ -19,6 +20,7 @@ n_data = mini_batch_size * 1000
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
+torch.save(position, Path('models/y_true_train.pt'))
 train = make_train_data(velocity, head_dir)
 
 # # start training
@@ -26,7 +28,7 @@ hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
-trainer = Trainer(train, position, model_name, hidden_size=hidden_size, rnn_layer=rnn_layer, n_epochs=20)
+trainer = Trainer(train, position, model_name, hidden_size=hidden_size, rnn_layer=rnn_layer, n_epochs=50)
 train_loss_epochs = trainer.train()
 
 # plot training progress
@@ -39,9 +41,10 @@ plt.savefig('loss.png', bbox_inches='tight')
 # plt.show()
 
 # generate test data
-n_data_test = 100
+n_data_test = 2000
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data_test)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
+torch.save(position, Path('models/y_true_test.pt'))
 test = make_train_data(velocity, head_dir)
 
 # load model

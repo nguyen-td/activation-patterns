@@ -3,6 +3,7 @@ import torch.nn as nn
 import time
 import numpy as np
 from more_itertools import chunked
+from pathlib import Path
 
 from network.rnn_layer import RNNLayer
 from utils.batch_padding import batch_padding
@@ -151,6 +152,7 @@ class RNNModel(nn.Module):
         aggregate_loss = 0
 
         y_pred = list()
+        x_test = list()
         with torch.no_grad():
             print('Start evaluation run: ')
             for batch in range(n_batches):
@@ -179,15 +181,24 @@ class RNNModel(nn.Module):
 
                 # save prediction
                 y_pred.append(y.detach().cpu().numpy())
+                x_test.append(x.detach().cpu().numpy())
 
             aggregate_loss /= n_batches
             end = time.time()
             print("\n")
             print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
 
-            # get prediction
-            y_list = [item for sublist in y_pred for item in sublist]
-            y_pred = np.array(y_list[:n_data])
+            # get prediction and model activitiy
+            y_pred = [item for sublist in y_pred for item in sublist]
+            y_pred = np.array(y_pred[:n_data])
+            x_test = [item for sublist in x_test for item in sublist]
+            x_test = np.array(x_test[:n_data])
+
+            # save stuff
+            y_pred_save_name = Path('models/y_pred_train.pt')
+            x_test_save_name = Path('models/x_test.pt')
+            torch.save(y_pred, y_pred_save_name)
+            torch.save(x_test, x_test_save_name)
 
         return aggregate_loss, y_pred
 
