@@ -5,7 +5,7 @@ from pathlib import Path
 
 from trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
-from utils.make_train_data import make_train_data
+from utils import make_train_data
 from network.network import RNNModel
 
 # generate training data

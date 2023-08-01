@@ -8,7 +8,7 @@ from pathlib import Path
 from more_itertools import chunked
 
 from network.network import RNNModel
-from utils.batch_padding import batch_padding
+from utils import batch_padding
 
 
 class Trainer:

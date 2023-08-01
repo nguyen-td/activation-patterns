@@ -5,8 +5,8 @@ import numpy as np
 from more_itertools import chunked
 from pathlib import Path
 
-from network.rnn_layer import RNNLayer
-from utils.batch_padding import batch_padding
+from .rnn_layer import RNNLayer
+from utils import batch_padding
 
 
 class RNNModel(nn.Module):
