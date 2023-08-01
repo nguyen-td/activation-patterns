@@ -139,7 +139,7 @@ class Trainer:
 
             # save in-between
             model_save_name = Path('models') / f'{self.model_name}-{epoch}-model.pt'
-            torch.save(model, model_save_name)
+            torch.save(model.state_dict(), model_save_name)
 
         # save stuff
         y_pred = [item for sublist in y_pred for item in sublist]
@@ -150,7 +150,7 @@ class Trainer:
         model_save_name = Path('models') / f'{self.model_name}-model.pt'
         y_pred_save_name = Path('models/y_pred_train.pt')
         x_train_save_name = Path('models/x_train.pt')
-        torch.save(model, model_save_name)
+        torch.save(model.state_dict(), model_save_name)
         torch.save(y_pred, y_pred_save_name)
         torch.save(x_train, x_train_save_name)
 

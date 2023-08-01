@@ -6,6 +6,7 @@ from pathlib import Path
 from trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
 from utils.make_train_data import make_train_data
+from network.network import RNNModel
 
 # generate training data
 T = 20  # duration of simulated trajectories (seconds)
@@ -48,7 +49,10 @@ torch.save(position, Path('models/y_true_test.pt'))
 test = make_train_data(velocity, head_dir)
 
 # load model
-rnn_model = torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
+rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
+rnn_model.double()
+rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt'))
+rnn_model.eval()
 aggregate_loss, y_pred = rnn_model.evaluate(test, position)
 
 # visualize trajectories
