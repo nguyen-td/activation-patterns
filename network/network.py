@@ -78,7 +78,7 @@ class RNNModel(nn.Module):
         
         Output:
             E: Torch scalar 
-                Error value
+                Error value/loss
         """
 
         R_l2 = torch.mean(W_in**2) + torch.mean(W_out**2) # L2 regularization 

@@ -53,7 +53,7 @@ class Trainer:
         self.model_name = model_name
         self.rnn_layer = rnn_layer
 
-        self.batch_size = mini_batch_size
+        self.mini_batch_size = mini_batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
         # model parameters
@@ -71,12 +71,12 @@ class Trainer:
     def train(self):
 
         # make mini-batches
-        train_batch = list((chunked(self.train_data, self.batch_size)))
-        target_batch = list((chunked(self.target_data, self.batch_size)))
+        train_batch = list((chunked(self.train_data, self.mini_batch_size)))
+        target_batch = list((chunked(self.target_data, self.mini_batch_size)))
         n_batches = len(train_batch)
         n_data = self.train_data.shape[0]
 
-        model = RNNModel(self.hidden_size, self.batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
+        model = RNNModel(self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
@@ -102,8 +102,8 @@ class Trainer:
 
                 # pad data if the number of dat a points is smaller than the selected mini-batch size
                 # FIXME: fix this by resampling from the whole data set
-                if train.size(0) < self.batch_size:
-                    train, target = batch_padding(train, target, self.batch_size)
+                if train.size(0) < self.mini_batch_size:
+                    train, target = batch_padding(train, target, self.mini_batch_size)
 
                 # clear out gradients
                 model.zero_grad()

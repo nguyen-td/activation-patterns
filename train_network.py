@@ -3,7 +3,7 @@ print(torch.cuda.is_available())
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-from trainer import Trainer
+from trainers.trainer import Trainer
 from trajectory_generator import TrajectoryGenerator
 from utils import make_train_data
 from network.network import RNNModel
