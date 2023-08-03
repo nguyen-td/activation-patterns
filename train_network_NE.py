@@ -21,9 +21,10 @@ position, velocity, head_dir = trajectory_generator.generate_trajectory()
 train = make_train_data(velocity, head_dir)
 
 # # start training
+pop_size = 10
 hidden_size = 100
 rnn_layer = 'custom' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
-trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, num_actors=2, rnn_layer=rnn_layer, n_epochs=5)
+trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, pop_size=pop_size, num_actors=2, rnn_layer=rnn_layer, n_epochs=5)
 trainer.train()

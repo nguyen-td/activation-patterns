@@ -21,6 +21,8 @@ class Trainer_NE:
             Name of the saved model
         rnn_layer: String {'custom', else}
             Type of RNN layer to use. If 'custom' is chosen, the custom layer will be used. Else, PyTorch's native RNN layer will be used.
+        pop_size: Scalar
+            Number of populations
         n_epochs: Scalar
             Number of epochs, default is 100
         mini_batch_size: Scalar
@@ -41,11 +43,12 @@ class Trainer_NE:
             Initial value of the simulation
     """
 
-    def __init__(self, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
+    def __init__(self, train_data, target_data, model_name, rnn_layer='native', pop_size=50, n_epochs=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
         self.train_dataset = TensorDataset(torch.as_tensor(train_data), torch.as_tensor(target_data))
         self.model_name = model_name
         self.rnn_layer = rnn_layer
 
+        self.pop_size = pop_size
         self.mini_batch_size = mini_batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
@@ -78,7 +81,7 @@ class Trainer_NE:
             x0 = self.x0
         )
 
-        searcher = SNES(problem, popsize = 10, radius_init = 2.25)
+        searcher = SNES(problem, popsize = self.pop_size, radius_init = 2.25)
         stdout_logger = StdOutLogger(searcher, interval = 1)
         pandas_logger = PandasLogger(searcher, interval = 1)
         searcher.run(self.n_epochs)
