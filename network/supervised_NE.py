@@ -22,7 +22,9 @@ class CustomSupervisedNE(SupervisedNE):
 
     def _evaluate_using_minibatch(self, network, batch):
         """
-        Pass a minibatch through a network, and compute the loss.
+        Pass a minibatch through a network, and compute the loss. 
+
+        WARNING: So far, this only works for the custom RNN. 
 
         Inputs:
             network: nn.Module

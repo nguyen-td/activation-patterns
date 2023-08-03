@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import TensorDataset
 from evotorch.algorithms import SNES
 from evotorch.logging import PandasLogger, StdOutLogger
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
@@ -81,7 +82,12 @@ class Trainer_NE:
         stdout_logger = StdOutLogger(searcher, interval = 1)
         pandas_logger = PandasLogger(searcher, interval = 1)
         searcher.run(self.n_epochs)
-        pandas_logger.to_dataframe().mean_eval.plot()
-        plt.show() # save figure instead
 
-        # safe searcher?
+        pandas_logger.to_dataframe().mean_eval.plot()
+        problem.kill_actors()
+        plt.savefig('loss-NE.png', bbox_inches='tight')
+
+        # save network
+        net = problem.parameterize_net(searcher.status['center']).cpu()
+        model_save_name = Path('models') / f'{self.model_name}-model.pt'
+        torch.save(net.state_dict(), model_save_name)
