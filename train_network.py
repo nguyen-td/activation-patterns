@@ -25,7 +25,7 @@ torch.save(position, Path('models/y_true_train.pt'))
 train = make_train_data(velocity, head_dir)
 
 # # start training
-hidden_size = 512
+hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
@@ -39,33 +39,5 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.savefig('loss.png', bbox_inches='tight')
 
-# plt.show()
-
-# generate test data
-n_data_test = 2000
-trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data_test)
-position, velocity, head_dir = trajectory_generator.generate_trajectory()
-torch.save(position, Path('models/y_true_test.pt'))
-test = make_train_data(velocity, head_dir)
-
-# load model
-rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
-rnn_model.double()
-rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt'))
-rnn_model.eval()
-aggregate_loss, y_pred = rnn_model.evaluate(test, position)
-
-# visualize trajectories
-traj_idx = 3
-plt.scatter(position[traj_idx, 0, 0], position[traj_idx, 0, 1], color = 'red', label = 'simulated starting point')
-plt.plot(position[traj_idx, :, 0], position[traj_idx, :, 1], label = 'simulated trajectory')
-
-plt.scatter(y_pred[traj_idx, 0, 0], y_pred[traj_idx, 0, 1], color = 'green', label = 'decoded starting point')
-plt.plot(y_pred[traj_idx, :, 0], y_pred[traj_idx, :, 1], label = 'decoded trajectory')
-plt.xlim(-1.2, 1.2)
-plt.ylim(-1.2, 1.2)
-plt.legend(bbox_to_anchor=(1.5, 1.))
-
-plt.savefig('trajectory.png', bbox_inches='tight')
 # plt.show()
 

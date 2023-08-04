@@ -197,10 +197,10 @@ class RNNModel(nn.Module):
             # save stuff
             y_pred_save_name = Path('models/y_pred_train.pt')
             x_test_save_name = Path('models/x_test.pt')
-            torch.save(y_pred, y_pred_save_name)
-            torch.save(x_test, x_test_save_name)
+            # torch.save(y_pred, y_pred_save_name)
+            # torch.save(x_test, x_test_save_name)
 
-        return aggregate_loss, y_pred
+        return aggregate_loss, x_test, y_pred
 
 
             

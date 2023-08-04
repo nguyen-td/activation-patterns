@@ -82,7 +82,7 @@ class Trainer_NE:
         )
 
         searcher = SNES(problem, popsize = self.pop_size, radius_init = 2.25)
-        stdout_logger = StdOutLogger(searcher, interval = 1)
+        stdout_logger = StdOutLogger(searcher, interval = 100)
         pandas_logger = PandasLogger(searcher, interval = 1)
         searcher.run(self.n_epochs)
 
