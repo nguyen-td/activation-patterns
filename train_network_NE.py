@@ -27,5 +27,5 @@ n_terations = 15700
 rnn_layer = 'custom' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
-trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, pop_size=pop_size, num_actors=2, rnn_layer=rnn_layer, n_epochs=15700)
+trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, pop_size=pop_size, num_actors=0, rnn_layer=rnn_layer, n_epochs=15700)
 trainer.train()
