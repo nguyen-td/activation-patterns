@@ -9,14 +9,13 @@ class CustomSupervisedNE(SupervisedNE):
         self.rnn_layer = rnn_layer
         self.l2_rate = l2_rate
         self.fr_rate = fr_rate
-        self.device = device
 
         model = RNNModel(hidden_size, minibatch_size, self.rnn_layer, self.l2_rate, self.fr_rate, dt, tau, x0)
         model.double()
-        model.to(self.device)
+        model.to(device)
 
         super(CustomSupervisedNE, self).__init__(
-            dataset = dataset, 
+            dataset = dataset.to(device), 
             network = model,
             minibatch_size = minibatch_size, 
             num_actors = num_actors)
