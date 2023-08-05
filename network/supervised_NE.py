@@ -9,20 +9,17 @@ class CustomSupervisedNE(SupervisedNE):
         self.rnn_layer = rnn_layer
         self.l2_rate = l2_rate
         self.fr_rate = fr_rate
+        self.device = device
 
         model = RNNModel(hidden_size, minibatch_size, self.rnn_layer, self.l2_rate, self.fr_rate, dt, tau, x0)
         model.double()
-        model.to(device)
+        model.to(self.device)
 
-        # super(CustomSupervisedNE, self).__init__(
-        #     dataset = dataset, 
-        #     network = model,
-        #     minibatch_size = minibatch_size, 
-        #     num_actors = num_actors)
         super(CustomSupervisedNE, self).__init__(
             dataset = dataset, 
             network = model,
-            minibatch_size = minibatch_size)
+            minibatch_size = minibatch_size, 
+            num_actors = num_actors)
 
     def _evaluate_using_minibatch(self, network, batch):
         """
@@ -41,7 +38,7 @@ class CustomSupervisedNE(SupervisedNE):
                 Error value/loss
         """
         with torch.no_grad():
-            input, y = batch
+            input, y = batch.to(self.device)
 
             if self.rnn_layer == 'custom':
                 x, u, y_hat = network.forward_custom_rnn(input) # forward pass
