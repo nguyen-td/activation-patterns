@@ -14,11 +14,15 @@ class CustomSupervisedNE(SupervisedNE):
         model.double()
         model.to(device)
 
+        # super(CustomSupervisedNE, self).__init__(
+        #     dataset = dataset, 
+        #     network = model,
+        #     minibatch_size = minibatch_size, 
+        #     num_actors = num_actors)
         super(CustomSupervisedNE, self).__init__(
             dataset = dataset, 
             network = model,
-            minibatch_size = minibatch_size, 
-            num_actors = num_actors)
+            minibatch_size = minibatch_size)
 
     def _evaluate_using_minibatch(self, network, batch):
         """
