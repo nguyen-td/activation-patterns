@@ -130,9 +130,9 @@ class RNNModel(nn.Module):
         Run the trained model on test data to path integrate from velocity and head direction inputs. 
 
         Inputs:
-            input_test: (n_dat x T x N_in) Torch tensor
+            input_test: (n_dat x T x N_in) Numpy array
                 Input trajectories
-            target_test: (n_dat x T x N_out) Torch tensor
+            target_test: (n_dat x T x N_out) Numpy array
                 Target output trajectories
         Outputs:
             aggregate_loss: Scalar

@@ -29,7 +29,7 @@ hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
-trainer = Trainer(train, position, model_name, hidden_size=hidden_size, rnn_layer=rnn_layer, n_epochs=50)
+trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=5)
 train_loss_epochs = trainer.train()
 
 # plot training progress
@@ -41,21 +41,18 @@ plt.savefig('loss.png', bbox_inches='tight')
 
 # plt.show()
 
+
+
 # generate test data
-n_data_test = 2000
+n_data_test = mini_batch_size * 80
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data_test)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
 test = make_train_data(velocity, head_dir)
 
-# load model
-hidden_size = 256
-mini_batch_size = 32
-rnn_layer = 'custom'
-
 # rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
 # rnn_model.double()
 rnn_model = torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
-# rnn_model.eval()
+rnn_model.eval()
 aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
 
 # plot trajectories generated from the network (on test data)
@@ -75,7 +72,7 @@ plt.savefig('trajectory1.png', bbox_inches='tight')
 # second model, load from state dict
 rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
 rnn_model.double()
-rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt', map_location=torch.device('cpu')))
+rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model_statedict.pt', map_location=torch.device('cpu')))
 rnn_model.eval()
 aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
 
