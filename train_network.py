@@ -24,12 +24,13 @@ position, velocity, head_dir = trajectory_generator.generate_trajectory()
 torch.save(position, Path('models/y_true_train.pt'))
 train = make_train_data(velocity, head_dir)
 
-# # start training
+# start training
+n_epochs = 50
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
-trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=50)
+trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=n_epochs)
 train_loss_epochs = trainer.train()
 
 # plot training progress
