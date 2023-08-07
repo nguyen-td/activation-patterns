@@ -29,7 +29,7 @@ hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
-trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=5)
+trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=50)
 train_loss_epochs = trainer.train()
 
 # plot training progress
