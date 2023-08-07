@@ -72,7 +72,7 @@ plt.savefig('trajectory1.png', bbox_inches='tight')
 # second model, load from state dict
 rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
 rnn_model.double()
-rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model_statedict.pt', map_location=torch.device('cpu')))
+rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model_statedict.pt'))
 rnn_model.eval()
 aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
 
