@@ -13,13 +13,13 @@ class RNNLayer(nn.Module):
     M: Mini-batch size
     """
 
-    def __init__(self, input_size, hidden_size, batch_size):
+    def __init__(self, input_size, hidden_size, batch_size, device):
         super(RNNLayer, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.batch_size = batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+        self.device = device
 
 
         # initialize trainable parameters according to Cueva & Wei, 2018

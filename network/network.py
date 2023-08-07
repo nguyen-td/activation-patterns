@@ -49,7 +49,7 @@ class RNNModel(nn.Module):
 
         # define layers
         if rnn_layer == 'custom':
-            self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size)
+            self.rnn = RNNLayer(self.input_size, self.hidden_size, self.batch_size, self.device)
         else:
             self.rnn = nn.RNN(self.input_size, self.hidden_size, bias=True, batch_first=True)
         self.linear = nn.Linear(self.hidden_size, self.output_size, bias=False)
