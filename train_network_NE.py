@@ -14,7 +14,7 @@ sequence_length = T * srate  # number of steps in trajectory
 box_width = 2.2       # width of training environment (m)
 box_height = 2.2      # height of training environment (m)
 mini_batch_size = 32
-n_data = mini_batch_size * 1000
+n_data = mini_batch_size * 314
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()

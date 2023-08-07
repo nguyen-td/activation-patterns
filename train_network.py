@@ -17,7 +17,7 @@ sequence_length = T * srate  # number of steps in trajectory
 box_width = 2.2       # width of training environment (m)
 box_height = 2.2      # height of training environment (m)
 mini_batch_size = 32
-n_data = mini_batch_size * 1000
+n_data = mini_batch_size * 314
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
@@ -52,9 +52,9 @@ hidden_size = 256
 mini_batch_size = 32
 rnn_layer = 'custom'
 
-rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
-rnn_model.double()
-torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
+# rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
+# rnn_model.double()
+rnn_model = torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt')
 # rnn_model.eval()
 aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
 
@@ -69,5 +69,26 @@ plt.xlim(-1.2, 1.2)
 plt.ylim(-1.2, 1.2)
 plt.legend(bbox_to_anchor=(1.5, 1.))
 
-plt.savefig('trajectory.png', bbox_inches='tight')
+plt.savefig('trajectory1.png', bbox_inches='tight')
+# plt.show()
+
+# second model, load from state dict
+rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
+rnn_model.double()
+rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model.pt', map_location=torch.device('cpu')))
+rnn_model.eval()
+aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
+
+# plot trajectories generated from the network (on test data)
+traj_idx = 3
+plt.scatter(position[traj_idx, 0, 0], position[traj_idx, 0, 1], color = 'red', label = 'simulated starting point')
+plt.plot(position[traj_idx, :, 0], position[traj_idx, :, 1], label = 'simulated trajectory')
+
+plt.scatter(y_pred[traj_idx, 0, 0], y_pred[traj_idx, 0, 1], color = 'green', label = 'decoded starting point')
+plt.plot(y_pred[traj_idx, :, 0], y_pred[traj_idx, :, 1], label = 'decoded trajectory')
+plt.xlim(-1.2, 1.2)
+plt.ylim(-1.2, 1.2)
+plt.legend(bbox_to_anchor=(1.5, 1.))
+
+plt.savefig('trajectory2.png', bbox_inches='tight')
 # plt.show()
