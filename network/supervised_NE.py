@@ -6,13 +6,14 @@ from network.network import RNNModel
 class CustomSupervisedNE(SupervisedNE):
     def __init__(self, dataset, device, minibatch_size, num_actors, hidden_size, rnn_layer, l2_rate, fr_rate, dt, tau, x0):
         
+        self.device = device
         self.rnn_layer = rnn_layer
         self.l2_rate = l2_rate
         self.fr_rate = fr_rate
 
         model = RNNModel(hidden_size, minibatch_size, self.rnn_layer, self.l2_rate, self.fr_rate, dt, tau, x0)
         model.double()
-        model.to(device)
+        model.to(self.device)
 
         super(CustomSupervisedNE, self).__init__(
             dataset = dataset, 
@@ -40,14 +41,14 @@ class CustomSupervisedNE(SupervisedNE):
             input, y = batch
 
             if self.rnn_layer == 'custom':
-                x, u, y_hat = network.forward_custom_rnn(input) # forward pass
+                x, u, y_hat = network.forward_custom_rnn(input.to(self.device)) # forward pass
                 W_in = network.rnn.W_in
             else:
                 u, y_hat = network.forward_native_rnn(input)
                 W_in = network.rnn.weight_ih_l0
             W_out = network.linear.weight
 
-            return self._loss(y_hat, y, W_in, W_out, u)
+            return self._loss(y_hat, y.to(self.device), W_in, W_out, u)
 
     def _loss(self, y_hat, y, W_in, W_out, u):
         """
