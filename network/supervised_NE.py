@@ -16,7 +16,7 @@ class CustomSupervisedNE(SupervisedNE):
 
         super(CustomSupervisedNE, self).__init__(
             dataset = dataset, 
-            device = device
+            device = device,
             network = model,
             minibatch_size = minibatch_size, 
             num_actors = num_actors)
