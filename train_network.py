@@ -71,8 +71,10 @@ plt.savefig('trajectory1.png', bbox_inches='tight')
 # plt.show()
 
 # second model, load from state dict
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 rnn_model = RNNModel(hidden_size, mini_batch_size, rnn_layer)
 rnn_model.double()
+rnn_model.to(device)
 rnn_model.load_state_dict(torch.load(f'models/RNN-{hidden_size}-{rnn_layer}-model_statedict.pt'))
 rnn_model.eval()
 aggregate_loss, y_pred, x = rnn_model.evaluate(test, position)
