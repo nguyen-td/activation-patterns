@@ -124,7 +124,7 @@ class RNNModel(nn.Module):
         for t in range(T-1):
             x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
         y = self.linear(u)
-        y[:, 0, :] = y_true[:, 0, :]
+        y[:, 0, :] = y_true[:, 0, :] # fix starting point
         
         return x, u, y
     
@@ -171,7 +171,7 @@ class RNNModel(nn.Module):
 
               # forward pass
                 if self.rnn_layer == 'custom':
-                    x, u, y = self.forward_custom_rnn(input)
+                    x, u, y = self.forward_custom_rnn(input, target)
                     W_in = self.rnn.W_in
                 else:
                     u, y = self.forward_native_rnn(input)
