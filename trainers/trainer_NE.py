@@ -93,4 +93,4 @@ class Trainer_NE:
         # save network
         net = problem.parameterize_net(searcher.status['center']).cpu()
         model_save_name = Path('models') / f'{self.model_name}-model.pt'
-        torch.save(net.state_dict(), model_save_name)
+        torch.save(net, model_save_name)

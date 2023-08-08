@@ -173,18 +173,18 @@ class RNNModel(nn.Module):
                 if self.rnn_layer == 'custom':
                     x, u, y = self.forward_custom_rnn(input, target)
                     W_in = self.rnn.W_in
+                    x_test.append(x.detach().cpu().numpy()) # save firing
                 else:
                     u, y = self.forward_native_rnn(input)
                     W_in = self.rnn.weight_ih_l0
+                    x_test.append(u.detach().cpu().numpy()) # save firing
+
                 W_out = self.linear.weight
+                y_pred.append(y.detach().cpu().numpy()) # save predictions
 
                 # compute error
                 loss = self.loss(y, target, W_in, W_out, u)
                 aggregate_loss += loss.item()
-
-                # save prediction
-                y_pred.append(y.detach().cpu().numpy())
-                x_test.append(x.detach().cpu().numpy())
 
             aggregate_loss /= n_batches
             end = time.time()
@@ -196,12 +196,6 @@ class RNNModel(nn.Module):
             y_pred = np.array(y_pred[:n_data])
             x_test = [item for sublist in x_test for item in sublist]
             x_test = np.array(x_test[:n_data])
-
-            # save stuff
-            y_pred_save_name = Path('models/y_pred_train.pt')
-            x_test_save_name = Path('models/x_test.pt')
-            # torch.save(y_pred, y_pred_save_name)
-            # torch.save(x_test, x_test_save_name)
 
         return aggregate_loss, x_test, y_pred
 

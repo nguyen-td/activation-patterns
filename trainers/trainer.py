@@ -126,11 +126,6 @@ class Trainer:
                 optimizer.step()
                 print(f"loss: {loss.item()}")
 
-                # save prediction and model activity in the last iteration
-                if epoch == (self.n_epochs - 1):
-                    y_pred.append(y.detach().cpu().numpy())
-                    x_train.append(x.detach().cpu().numpy())
-
             train_loss /= n_batches
             train_loss_epochs[epoch] = train_loss
             end = time.time()
