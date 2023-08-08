@@ -110,7 +110,7 @@ class Trainer:
 
                 # forward pass
                 if self.rnn_layer == 'custom':
-                    x, u, y = model.forward_custom_rnn(train)
+                    x, u, y = model.forward_custom_rnn(train, target)
                     W_in = model.rnn.W_in
                 else:
                     u, y = model.forward_native_rnn(train)

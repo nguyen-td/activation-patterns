@@ -92,13 +92,15 @@ class RNNModel(nn.Module):
 
         return u, y
 
-    def forward_custom_rnn(self, I):
+    def forward_custom_rnn(self, I, y_true):
         """
         Wrapper function for the simulation of the network.
 
         Inputs:
             I: (M x T x N_in) Torch tensor
                 Input trajectories
+            y_true: (M x T x N_out) Torch tensor
+                Ground truth targets, used to fix the starting point
 
         Outputs:
             x: (M x T x N) Torch tensor
@@ -122,6 +124,7 @@ class RNNModel(nn.Module):
         for t in range(T-1):
             x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
         y = self.linear(u)
+        y[:, 0, :] = y_true[:, 0, :]
         
         return x, u, y
     
