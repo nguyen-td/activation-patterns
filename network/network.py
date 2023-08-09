@@ -142,14 +142,14 @@ class RNNModel(nn.Module):
                 Aggregated loss
             y_pred: (n_dat x T x N_out) Torch tensoor
                 Predicted output trajectories
+            x_test; (n_dat x T x N_out) Torch tensor
+                Activation of the units
         """
 
         # make mini-batches
         input_batch = list((chunked(input_test, self.batch_size)))
         target_batch = list((chunked(target_test, self.batch_size)))
-        
         n_batches = len(input_batch)
-        n_data = input_test.shape[0]
 
         start = time.time()
         aggregate_loss = 0
@@ -191,13 +191,8 @@ class RNNModel(nn.Module):
             print("\n")
             print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
 
-            # get prediction and model activitiy
-            y_pred = [item for sublist in y_pred for item in sublist]
-            y_pred = np.array(y_pred[:n_data])
-            x_test = [item for sublist in x_test for item in sublist]
-            x_test = np.array(x_test[:n_data])
 
-        return aggregate_loss, x_test, y_pred
+        return aggregate_loss, np.concatenate(y_pred, axis=0), np.concatenate(x_test, axis=0), 
 
 
             

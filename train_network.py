@@ -26,7 +26,7 @@ train = make_train_data(velocity, head_dir)
 
 # start training
 n_epochs = 50
-hidden_size = 512
+hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
 
