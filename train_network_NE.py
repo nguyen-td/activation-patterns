@@ -24,7 +24,7 @@ train = make_train_data(velocity, head_dir)
 n_epochs = 15700
 pop_size = 1000
 hidden_size = 256
-n_terations = 15700
+n_terations = 2000
 rnn_layer = 'custom' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
