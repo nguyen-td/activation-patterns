@@ -22,7 +22,7 @@ train = make_train_data(velocity, head_dir)
 
 # # start training
 n_epochs = 15700
-pop_size = 1000
+pop_size = 200
 hidden_size = 256
 n_terations = 2000
 rnn_layer = 'custom' 
