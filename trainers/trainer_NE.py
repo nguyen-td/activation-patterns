@@ -23,8 +23,8 @@ class Trainer_NE:
             Type of RNN layer to use. If 'custom' is chosen, the custom layer will be used. Else, PyTorch's native RNN layer will be used.
         pop_size: Scalar
             Number of populations
-        n_epochs: Scalar
-            Number of epochs, default is 100
+        n_iterations: Scalar
+            Number of iterations, default is 100
         mini_batch_size: Scalar
             Number of mini-batches, default is 64
         hidden_size: Scalar
@@ -43,7 +43,7 @@ class Trainer_NE:
             Initial value of the simulation
     """
 
-    def __init__(self, train_data, target_data, model_name, rnn_layer='native', pop_size=50, n_epochs=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
+    def __init__(self, train_data, target_data, model_name, rnn_layer='native', pop_size=50, n_iterations=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
         self.train_dataset = TensorDataset(torch.as_tensor(train_data), torch.as_tensor(target_data))
         self.model_name = model_name
         self.rnn_layer = rnn_layer
@@ -56,7 +56,7 @@ class Trainer_NE:
         self.hidden_size = hidden_size
         self.l2_rate = l2_rate
         self.fr_rate = fr_rate
-        self.n_epochs = n_epochs
+        self.n_iterations = n_iterations
         self.num_actors = num_actors
 
         # simulation parameters
@@ -84,7 +84,7 @@ class Trainer_NE:
         searcher = SNES(problem, popsize = self.pop_size, radius_init = 2.25)
         stdout_logger = StdOutLogger(searcher, interval = 100)
         pandas_logger = PandasLogger(searcher, interval = 1)
-        searcher.run(self.n_epochs)
+        searcher.run(self.n_iterations)
 
         pandas_logger.to_dataframe().mean_eval.plot()
         problem.kill_actors()
