@@ -87,7 +87,6 @@ class Trainer_NE:
         searcher.run(self.n_iterations)
 
         pandas_logger.to_dataframe().mean_eval.plot()
-        problem.kill_actors()
         plt.savefig('loss-NE.png', bbox_inches='tight')
 
         # save network

@@ -24,7 +24,7 @@ def create_ratemaps(x, y_pred, box_width, box_height):
     spatial_maps = list()
     # for neuron in range(x.shape[2]):
     for neuron in range(3):
-        print(f"Neuron {neuron+1}\n-------------------------------")
+        print(f"Neuron {neuron+1}\n................")
 
         # single neuron
         x_neuron = x[:, :, neuron]
