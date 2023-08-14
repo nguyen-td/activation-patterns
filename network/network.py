@@ -124,7 +124,7 @@ class RNNModel(nn.Module):
         for t in range(T-1):
             x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
         y = self.linear(u)
-        y[:, 0, :] = y_true[:, 0, :] # fix starting point
+        # y[:, 0, :] = y_true[:, 0, :] # fix starting point
         
         return x, u, y
     

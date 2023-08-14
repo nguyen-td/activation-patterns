@@ -9,7 +9,7 @@ from utils import make_train_data
 from network.network import RNNModel
 
 # generate training data
-T = 20  # duration of simulated trajectories (seconds)
+T = 5  # duration of simulated trajectories (seconds)
 srate = 50  # sampling rate (Hz)
 
 border_region = 0.03  # max. distance to wall (m)
