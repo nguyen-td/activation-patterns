@@ -41,10 +41,10 @@ class CustomSupervisedNE(SupervisedNE):
             input, y = batch
 
             if self.rnn_layer == 'custom':
-                x, u, y_hat = network.forward_custom_rnn(input.to(self.device), y.to(self.device)) # forward pass
+                x, u, y_hat = network.forward_custom_rnn(input.to(self.device)) # forward pass
                 W_in = network.rnn.W_in
             else:
-                u, y_hat = network.forward_native_rnn(input)
+                u, y_hat = network.forward_native_rnn(input.to(self.device))
                 W_in = network.rnn.weight_ih_l0
             W_out = network.linear.weight
 

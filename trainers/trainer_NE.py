@@ -3,6 +3,7 @@ from torch.utils.data import TensorDataset
 from evotorch.algorithms import SNES
 from evotorch.logging import PandasLogger, StdOutLogger
 from pathlib import Path
+import os
 
 import matplotlib.pyplot as plt
 
@@ -90,6 +91,10 @@ class Trainer_NE:
         plt.savefig('loss-NE.png', bbox_inches='tight')
 
         # save network
+        save_folder = 'models'
+        if not os.path.isdir(save_folder):
+            os.mkdir(save_folder)
+
         net = problem.parameterize_net(searcher.status['center']).cpu()
-        model_save_name = Path('models') / f'{self.model_name}-model.pt'
+        model_save_name = Path(save_folder) / f'{self.model_name}-model.pt'
         torch.save(net, model_save_name)

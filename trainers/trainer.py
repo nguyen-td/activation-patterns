@@ -110,7 +110,7 @@ class Trainer:
 
                 # forward pass
                 if self.rnn_layer == 'custom':
-                    x, u, y = model.forward_custom_rnn(train, target)
+                    x, u, y = model.forward_custom_rnn(train)
                     W_in = model.rnn.W_in
                 else:
                     u, y = model.forward_native_rnn(train)
@@ -132,7 +132,7 @@ class Trainer:
 
             print(f"Training loss: {train_loss}  {round(end - start, 3)} seconds for this epoch \n")
 
-        model_save_name = Path('models') / f'{self.model_name}-model.pt'
+        model_save_name = Path(save_folder) / f'{self.model_name}-model.pt'
         torch.save(model, model_save_name)
 
         return train_loss_epochs
