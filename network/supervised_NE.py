@@ -25,8 +25,6 @@ class CustomSupervisedNE(SupervisedNE):
         """
         Pass a minibatch through a network, and compute the loss. 
 
-        WARNING: So far, this only works for the custom RNN. 
-
         Inputs:
             network: nn.Module
                 Network to be trained
