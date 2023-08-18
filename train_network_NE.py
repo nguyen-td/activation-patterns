@@ -23,7 +23,7 @@ train = make_train_data(velocity, head_dir)
 # # start training
 pop_size = 200
 hidden_size = 256
-n_terations = 2000
+n_terations = 500
 rnn_layer = 'custom' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
