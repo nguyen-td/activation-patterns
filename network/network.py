@@ -168,7 +168,7 @@ class RNNModel(nn.Module):
 
               # forward pass
                 if self.rnn_layer == 'custom':
-                    x, u, y = self.forward_custom_rnn(input, target)
+                    x, u, y = self.forward_custom_rnn(input)
                     W_in = self.rnn.W_in
                     x_test.append(x.detach().cpu().numpy()) # save firing
                 else:
