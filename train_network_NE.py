@@ -2,8 +2,7 @@ import torch
 print(torch.cuda.is_available())
 
 from trainers.trainer_NE import Trainer_NE
-from trajectory_generator import TrajectoryGenerator
-from utils import make_train_data
+from utils import make_train_data, TrajectoryGenerator
 
 # generate training data
 T = 20  # duration of simulated trajectories (seconds)

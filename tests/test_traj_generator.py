@@ -1,4 +1,4 @@
-from trajectory_generator import TrajectoryGenerator
+from utils import TrajectoryGenerator
 from torch.utils.data import DataLoader
 
 
@@ -8,7 +8,7 @@ box_width = 2.2       # width of training environment (m)
 box_height = 2.2      # height of training environment (m)
 batch_size = 10
 
-trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, batch_size)
+trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
 
 print(position.shape)

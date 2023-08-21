@@ -1,9 +1,7 @@
 import torch
 import pickle
 
-from trajectory_generator import TrajectoryGenerator
-from utils.make_train_data import make_train_data
-from utils.create_ratemaps import create_ratemaps
+from utils import make_train_data, create_ratemaps, TrajectoryGenerator
 
 # define parameters
 T = 20  # duration of simulated trajectories (seconds)

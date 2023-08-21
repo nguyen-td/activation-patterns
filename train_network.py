@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from trainers.trainer import Trainer
-from trajectory_generator import TrajectoryGenerator
-from utils import make_train_data
+from utils import make_train_data, TrajectoryGenerator
 from network.network import RNNModel
 
 # generate training data

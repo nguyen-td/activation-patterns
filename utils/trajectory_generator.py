@@ -41,12 +41,12 @@ class TrajectoryGenerator:
             turn_angle: (batch_size, )
                 List of turn angles
         """
-        x = position[:, 0]
-        y = position[:, 1]
+        x = position[0]
+        y = position[1]
         dists = [self.box_width / 2 - x, self.box_height / 2 - y, self.box_width / 2 + x, self.box_height / 2 + y]
-        d_wall = np.min(dists, axis=0)
+        d_wall = np.min(dists)
         angles = np.arange(4) * np.pi / 2
-        theta = angles[np.argmin(dists, axis=0)]
+        theta = angles[np.argmin(dists)]
         head_dir = np.mod(head_dir, 2 * np.pi)
         a_wall = head_dir - theta
         a_wall = np.mod(a_wall + np.pi, 2 * np.pi) - np.pi # periodic variable
@@ -54,8 +54,9 @@ class TrajectoryGenerator:
         # too close if agent is closer than [self.border_region] meters to the wall and its head direction is 
         # smaller than 90° w.r.t. the normal vector of the wall
         is_near_wall = (d_wall < self.border_region) * (np.abs(a_wall) < np.pi / 2)
-        turn_angle = np.zeros_like(head_dir)
-        turn_angle[is_near_wall] = np.sign(a_wall[is_near_wall]) * (np.pi / 2 - np.abs(a_wall[is_near_wall]))
+        turn_angle = 0
+        if is_near_wall:
+            turn_angle = np.sign(a_wall[is_near_wall]) * (np.pi / 2 - np.abs(a_wall[is_near_wall]))
 
         return is_near_wall, turn_angle
 
@@ -64,11 +65,11 @@ class TrajectoryGenerator:
         Generate a random walk in a rectangular box.
         
         Outputs:
-            position: (batch_size x T x 2) Numpy array
+            out_position: (batch_size x T x 2) Numpy array
                 Position in 2D (x and y coordinates)
-            velocity: (batch_size x T) Numpy array
+            out_velocity: (batch_size x T) Numpy array
                 Velocity (m/sample)
-            head_dir: (batch_size x T) Numpy array
+            out_head_dir: (batch_size x T) Numpy array
                 Head direction (rads)
         """
 
@@ -79,36 +80,40 @@ class TrajectoryGenerator:
         sigma = 5.76 * 2   # rotation velocity Gaussian distribution stdev (rads/s)
 
         # Initialize variables
-        position = np.zeros([self.batch_size, samples, 2])
-        head_dir = np.zeros([self.batch_size, samples])
-        position[:, 0, 0] = np.random.uniform(-self.box_width / 2, self.box_width / 2, self.batch_size)
-        position[:, 0, 1] = np.random.uniform(-self.box_width / 2, self.box_width / 2, self.batch_size)
-        head_dir[:, 0] = np.random.uniform(0, 2 * np.pi, self.batch_size)
-        velocity = np.zeros([self.batch_size, samples])
+        position = np.zeros([samples, 2])
+        head_dir = np.zeros([samples])
+        position[0, 0] = np.random.uniform(-self.box_width / 2, self.box_width / 2)
+        position[0, 1] = np.random.uniform(-self.box_width / 2, self.box_width / 2)
+        head_dir[0] = np.random.uniform(0, 2 * np.pi)
+        velocity = np.zeros([samples])
 
         # Generate sequence of random boosts and turns
-        random_turn = np.random.normal(mu, sigma, [self.batch_size, samples + 1])
-        random_vel = np.random.rayleigh(b, [self.batch_size, samples + 1])
+        random_turn = np.random.normal(mu, sigma, samples + 1)
+        random_vel = np.random.rayleigh(b, samples + 1)
 
         for t in range(samples - 1):
             # Update velocity
-            v = random_vel[:, t]
-            turn_angle = np.zeros(self.batch_size)
+            v = random_vel[t]
+            turn_angle = 0
 
-            is_near_wall, turn_angle = self.avoid_wall(position[:, t], head_dir[:, t])
-            v[is_near_wall] *= 0.25 # slow down
+            is_near_wall, turn_angle = self.avoid_wall(position[t], head_dir[t])
+            if is_near_wall:
+                v *= 0.25 # slow down
                 
             # Update turn angle
-            turn_angle += dt * random_turn[:, t]
+            turn_angle += dt * random_turn[t]
 
             # Take a step
-            velocity[:, t] = v * dt
-            update = velocity[:, t, None] * np.stack([np.cos(head_dir[:, t]), np.sin(head_dir[:, t])], axis=-1)
-            position[:, t + 1] = position[:, t] + update
+            velocity[t] = v * dt
+            update = velocity[t] * np.stack([np.cos(head_dir[t]), np.sin(head_dir[t])], axis=-1)
+            position[t + 1] = position[t] + update
 
             # Rotate head direction
-            head_dir[:, t + 1] = head_dir[:, t] + turn_angle
+            head_dir[t + 1] = head_dir[t] + turn_angle
 
         head_dir = np.mod(head_dir + np.pi, 2 * np.pi) - np.pi # periodic variable
-    
-        return position, velocity, head_dir
+
+        out_position = np.full((self.batch_size, position.shape[0], position.shape[1]), position)
+        out_velocity = np.full((self.batch_size, velocity.shape[0]), velocity)
+        out_head_dir = np.full((self.batch_size, head_dir.shape[0]), head_dir)
+        return out_position, out_velocity, out_head_dir
