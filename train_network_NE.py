@@ -1,5 +1,6 @@
 import torch
 print(torch.cuda.is_available())
+from pathlib import Path
 
 from trainers.trainer_NE import Trainer_NE
 from utils import make_train_data, TrajectoryGenerator
@@ -17,6 +18,7 @@ n_data = mini_batch_size * 314
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
+torch.save([position, velocity, head_dir], Path('data-NE.pt'))
 train = make_train_data(velocity, head_dir)
 
 # # start training
