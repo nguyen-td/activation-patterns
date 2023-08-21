@@ -20,7 +20,7 @@ n_data = mini_batch_size * 1000
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
-torch.save(list(position, velocity, head_dir), Path('data.pt'))
+torch.save([position, velocity, head_dir], Path('data.pt'))
 train = make_train_data(velocity, head_dir)
 
 # start training
