@@ -8,7 +8,7 @@ from utils import make_train_data, TrajectoryGenerator
 from network.network import RNNModel
 
 # generate training data
-T = 5  # duration of simulated trajectories (seconds)
+T = 20  # duration of simulated trajectories (seconds)
 srate = 50  # sampling rate (Hz)
 
 border_region = 0.03  # max. distance to wall (m)
@@ -20,11 +20,11 @@ n_data = mini_batch_size * 1000
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
-torch.save(position, Path('models/y_true_train.pt'))
+torch.save(list(position, velocity, head_dir), Path('data.pt'))
 train = make_train_data(velocity, head_dir)
 
 # start training
-n_epochs = 100
+n_epochs = 50
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
