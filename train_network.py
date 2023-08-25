@@ -20,11 +20,11 @@ n_data = mini_batch_size * 1000
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
-torch.save([position, velocity, head_dir], Path('data.pt'))
+torch.save([position[0], velocity[0], head_dir[0]], 'data.pt')
 train = make_train_data(velocity, head_dir)
 
 # start training
-n_epochs = 50
+n_epochs = 20
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
