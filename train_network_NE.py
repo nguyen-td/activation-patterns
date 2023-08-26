@@ -24,8 +24,8 @@ train = make_train_data(velocity, head_dir)
 # # start training
 pop_size = 200
 hidden_size = 256
-n_terations = 500
-rnn_layer = 'native' 
+n_terations = 800
+rnn_layer = 'custom' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
 trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, pop_size=pop_size, num_actors="num_gpus", rnn_layer=rnn_layer, n_iterations=n_terations)

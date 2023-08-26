@@ -95,6 +95,6 @@ class Trainer_NE:
         if not os.path.isdir(save_folder):
             os.mkdir(save_folder)
 
-        net = problem.parameterize_net(searcher.status['center']).cpu()
+        net = problem.parameterize_net(searcher.status['center'])
         model_save_name = Path(save_folder) / f'{self.model_name}-model.pt'
         torch.save(net, model_save_name)
