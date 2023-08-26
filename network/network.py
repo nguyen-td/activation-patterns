@@ -125,28 +125,23 @@ class RNNModel(nn.Module):
         
         return x, u, y
     
-    def evaluate(self, input_test, target_test):
+    def evaluate(self, input, target):
         """
         Run the trained model on test data to path integrate from velocity and head direction inputs. 
 
         Inputs:
-            input_test: (n_dat x T x N_in) Numpy array
+            input: (T x N_in) Numpy array
                 Input trajectories
-            target_test: (n_dat x T x N_out) Numpy array
+            target: (T x N_out) Numpy array
                 Target output trajectories
         Outputs:
             aggregate_loss: Scalar
                 Aggregated loss
-            y_pred: (n_dat x T x N_out) Torch tensoor
+            y: (T x N_out) Torch tensoor
                 Predicted output trajectories
-            x_test; (n_dat x T x N_out) Torch tensor
+            x: (T x N_out) Torch tensor
                 Activation of the units
         """
-
-        # make mini-batches
-        input_batch = list((chunked(input_test, self.batch_size)))
-        target_batch = list((chunked(target_test, self.batch_size)))
-        n_batches = len(input_batch)
 
         start = time.time()
         aggregate_loss = 0
@@ -155,41 +150,30 @@ class RNNModel(nn.Module):
         x_test = list()
         with torch.no_grad():
             print('Start evaluation run: ')
-            for batch in range(n_batches):
-                print('.', end='')
+            # set up data
+            input = torch.as_tensor(input, device=self.device)
+            target = torch.as_tensor(target, device=self.device)
 
-                # set up data
-                input = torch.as_tensor(np.array(input_batch[batch]), device=self.device)
-                target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
+            # forward pass
+            if self.rnn_layer == 'custom':
+                x, u, y = self.forward_custom_rnn(input)
+                W_in = self.rnn.W_in
+            else:
+                u, y = self.forward_native_rnn(input)
+                W_in = self.rnn.weight_ih_l0
 
-                # pad data if the number of data points is smaller than the selected mini-batch size
-                if input.size(0) < self.batch_size:
-                    input, target = batch_padding(input, target, self.batch_size)
+            W_out = self.linear.weight
 
-              # forward pass
-                if self.rnn_layer == 'custom':
-                    x, u, y = self.forward_custom_rnn(input)
-                    W_in = self.rnn.W_in
-                    x_test.append(x.detach().cpu().numpy()) # save firing
-                else:
-                    u, y = self.forward_native_rnn(input)
-                    W_in = self.rnn.weight_ih_l0
-                    x_test.append(u.detach().cpu().numpy()) # save firing
+            # compute error
+            y[0, :] = target[0, :] # fix starting point
+            loss = self.loss(y, target, W_in, W_out, u)
+            aggregate_loss += loss.item()
 
-                W_out = self.linear.weight
-                y_pred.append(y.detach().cpu().numpy()) # save predictions
-
-                # compute error
-                loss = self.loss(y, target, W_in, W_out, u)
-                aggregate_loss += loss.item()
-
-            aggregate_loss /= n_batches
             end = time.time()
             print("\n")
             print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
 
-
-        return aggregate_loss, np.concatenate(y_pred, axis=0), np.concatenate(x_test, axis=0), 
+        return aggregate_loss, y.detach().cpu().numpy(), x.detach().cpu().numpy()
 
 
             

@@ -46,6 +46,7 @@ class CustomSupervisedNE(SupervisedNE):
                 W_in = network.rnn.weight_ih_l0
             W_out = network.linear.weight
 
+            y[:, 0, :] = y_hat[:, 0, :] # fix starting point
             return self._loss(y_hat, y.to(self.device), W_in, W_out, u)
 
     def _loss(self, y_hat, y, W_in, W_out, u):

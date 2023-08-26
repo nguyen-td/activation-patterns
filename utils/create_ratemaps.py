@@ -1,5 +1,7 @@
 import numpy as np
 from collections import Counter
+import itertools
+import matplotlib.pyplot as plt
 
 
 def create_ratemaps(x, y_pred, box_width, box_height):
@@ -7,9 +9,9 @@ def create_ratemaps(x, y_pred, box_width, box_height):
     Compute spatial ratemaps by binning the agent's position into 2 cm x 2 cm bins, and computing the average firing rate within each bin. 
 
     Inputs:
-        x: (n_data x T x n_hidden_neurons) Numpy array
+        x: (T x n_hidden_neurons) Numpy array
             Activation of the units
-        y_pred: (n_data x T x 2) Numpy array
+        y_pred: (T x 2) Numpy array
             Predicted positions
         box_width: Scalar
             Width of the artificial box in meters
@@ -17,16 +19,16 @@ def create_ratemaps(x, y_pred, box_width, box_height):
             Height (in 2D, could also be length) of the artificial box in meters
 
     Output:
-        spatial_maps: List of length n_neurons, each entry is a (n_data * T x 3) numpy array
-            Data matrix containing the (mean) firing activity and the corresponding spatial positions in column 2 and 3 respectively (spatial_maps[:, :, 1:3])
+        spatial_maps: List of length n_neurons, each entry is a (T x 3) numpy array
+            Data matrix containing the (mean) firing activity and the corresponding spatial positions in column 2 and 3 respectively (spatial_maps[:, 1:3])
     """
 
     spatial_maps = list()
-    for neuron in range(x.shape[2]):
-        print(f"Neuron {neuron+1}\n................")
+    for neuron in range(x.shape[1]):
+        # print(f"Neuron {neuron+1}\n................")
 
         # single neuron
-        x_neuron = x[:, :, neuron]
+        x_neuron = x[:, neuron]
         x_resh = x_neuron.reshape(-1, 1)
         y_resh = y_pred.reshape(-1, 2)
 
@@ -60,7 +62,47 @@ def create_ratemaps(x, y_pred, box_width, box_height):
 
     return spatial_maps
 
-def plot_ratemaps():
-    pass
+def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, smooth=True):
+    """
+    Plot spatial ratemaps and save the final figure.
+
+    Inputs:
+        spatial_maps: List of length n_neurons, each entry is a (T x 3) numpy array
+            Data matrix containing the (mean) firing activity and the corresponding spatial positions in column 2 and 3 respectively (spatial_maps[:, 1:3])
+        hidden_size: Scalar
+            Number of hidden neurons in the recurrent layer
+        box_width: Scalar
+            Width of the artificial box in meters
+        box_heigtht: Scalar
+            Height (in 2D, could also be length) of the artificial box in meters
+        resolution: Scalar
+            Size of each bin
+        smooth: Boolean
+            If True, Gaussian smoothing will be applied
+    """
+    # get all combinations
+    p = itertools.product(np.arange(0, np.sqrt(hidden_size), 1), np.arange(0, np.sqrt(hidden_size), 1))
+    min_firing = np.min(spatial_maps)
+    max_firing = np.max(spatial_maps)
+
+    fig, axs = plt.subplots(int(np.sqrt(hidden_size)), int(np.sqrt(hidden_size)), figsize=(15, 15))
+    for idx, comb in enumerate(p):
+        x_plt = spatial_maps[idx][:, 0]
+        y_plt = spatial_maps[idx][:, 1]
+        z_plt = spatial_maps[idx][:, 2]
+
+        x_bins = y_bins = np.arange(-box_width / 2, box_height / 2, resolution)  # 110 bins of size 2 cm
+
+        heatmap, _, _ = np.histogram2d(x_plt, y_plt, bins=[x_bins, y_bins], weights=z_plt)
+        
+        if smooth:
+            axs[int(comb[0]), int(comb[1])].imshow(heatmap.T, extent=[x_bins.min(), x_bins.max(), y_bins.min(), y_bins.max()], vmin=min_firing, vmax=max_firing, origin='lower', aspect='auto', interpolation='gaussian', cmap='jet')
+        else:
+            axs[int(comb[0]), int(comb[1])].imshow(heatmap.T, extent=[x_bins.min(), x_bins.max(), y_bins.min(), y_bins.max()], vmin=min_firing, vmax=max_firing, origin='lower', aspect='auto', cmap='jet')
+        axs[int(comb[0]), int(comb[1])].set_xlim([-box_width / 2, box_width / 2])
+        axs[int(comb[0]), int(comb[1])].set_ylim([-box_width / 2, box_width / 2])
+        axs[int(comb[0]), int(comb[1])].set_axis_off()
+
+    fig.savefig('ratemaps.png', bbox_inches='tight')
 
 
