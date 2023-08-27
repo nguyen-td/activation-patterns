@@ -120,8 +120,7 @@ class RNNModel(nn.Module):
         # initialization
         x[:, 0, :] = torch.tensor(self.x0, device=self.device)
         if self.activation == 'relu':
-            relu = nn.ReLU()
-            u[:, 0, :] = relu(x[:, 0, :])
+            u[:, 0, :] = torch.relu(x[:, 0, :])
         else: # tanh
             u[:, 0, :] = torch.tanh(x[:, 0, :])
         
