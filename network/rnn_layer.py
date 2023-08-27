@@ -62,9 +62,9 @@ class RNNLayer(nn.Module):
         #     u = torch.relu(x)
         # else:
         #     u = torch.tanh(x)
-        x = 1 / tau * (-x + torch.matmul(torch.relu(x), self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
-        u = torch.relu(x)
-        
+        x = 1 / tau * (-x + torch.matmul(torch.tanh(x), self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
+        u = torch.tanh(x)
+
         return x, u
 
     def forward_euler(self, x_in, I, dt, tau):
