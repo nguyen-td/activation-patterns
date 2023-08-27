@@ -122,8 +122,7 @@ class RNNModel(nn.Module):
         if self.activation == 'relu':
             u[:, 0, :] = torch.relu(x[:, 0, :])
         elif self.activation == 'heaviside': # heaviside step function
-            with torch.no_grad():
-                u[:, 0, :] = torch.heaviside(x[:, 0, :], torch.tensor([1.0]))
+            u[:, 0, :] = torch.heaviside(x[:, 0, :], torch.tensor([1.0], dtype=torch.float64))
         else: # tanh
             u[:, 0, :] = torch.tanh(x[:, 0, :])
         

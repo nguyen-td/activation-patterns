@@ -80,6 +80,7 @@ def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, 
         smooth: Boolean
             If True, Gaussian smoothing will be applied
     """
+    
     # get all combinations
     p = itertools.product(np.arange(0, np.sqrt(hidden_size), 1), np.arange(0, np.sqrt(hidden_size), 1))
     min_firing = np.min(spatial_maps)
