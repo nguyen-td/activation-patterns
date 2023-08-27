@@ -119,11 +119,10 @@ class RNNModel(nn.Module):
 
         # initialization
         x[:, 0, :] = torch.tensor(self.x0, device=self.device)
-        u[:, 0, :] = torch.relu(x[:, 0, :])
-        # if self.activation == 'relu':
-        #     u[:, 0, :] = torch.relu(x[:, 0, :])
-        # else: # tanh
-        #     u[:, 0, :] = torch.tanh(x[:, 0, :])
+        if self.activation == 'relu':
+            u[:, 0, :] = torch.relu(x[:, 0, :])
+        else: # tanh
+            u[:, 0, :] = torch.tanh(x[:, 0, :])
         
         # simulate network
         for t in range(T-1):
