@@ -28,7 +28,7 @@ n_epochs = 20
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
-activation = 'tanh'
+activation = 'relu'
 
 trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=n_epochs, activation=activation)
 train_loss_epochs = trainer.train()
