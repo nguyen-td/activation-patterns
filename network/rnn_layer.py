@@ -61,7 +61,7 @@ class RNNLayer(nn.Module):
         if self.activation == 'relu':
             u = torch.relu(x)
         elif self.activation == 'heaviside': # heaviside step function
-            u = torch.heaviside(x, torch.tensor([1]))
+            u = torch.heaviside(x, torch.tensor([1.0]))
         else:
             u = torch.tanh(x)
         x = 1 / tau * (-x + torch.matmul(u, self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
