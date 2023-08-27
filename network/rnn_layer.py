@@ -59,9 +59,9 @@ class RNNLayer(nn.Module):
         xi = torch.t(xi.expand(-1, self.batch_size)).double()
         
         if self.activation == 'relu':
-            u = torch.relu(x)
+            u = nn.ReLU(x)
         else:
-            u = torch.tanh(x)
+            u = nn.Tanh(x)
         x = 1 / tau * (-x + torch.matmul(u, self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
 
         return x, u
