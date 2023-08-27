@@ -77,7 +77,6 @@ class Trainer:
         train_batch = list((chunked(self.train_data, self.mini_batch_size)))
         target_batch = list((chunked(self.target_data, self.mini_batch_size)))
         n_batches = len(train_batch)
-        n_data = self.train_data.shape[0]
 
         model = RNNModel(self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0, self.activation)
         model.double()
