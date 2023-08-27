@@ -31,7 +31,7 @@ class RNNModel(nn.Module):
         x0: Scalar
             Initial value of the simulation 
         activation: String
-            Activation function of the recurrent network: "tanh", "relu". Default is "tanh"
+            Activation function of the recurrent network: "tanh", "relu", "heaviside". Default is "tanh"
     """
 
     def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh'):
@@ -121,12 +121,14 @@ class RNNModel(nn.Module):
         x[:, 0, :] = torch.tensor(self.x0, device=self.device)
         if self.activation == 'relu':
             u[:, 0, :] = torch.relu(x[:, 0, :])
+        elif self.activation == 'heaviside': # heaviside step function
+            u[:, 0, :] = torch.heaviside(x[:, 0, :], [1])
         else: # tanh
             u[:, 0, :] = torch.tanh(x[:, 0, :])
         
         # simulate network
         for t in range(T-1):
-            x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
+            x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], u[:, t, :], I[:, t, :], self.dt, self.tau)
         y = self.linear(u)
         
         return x, u, y
@@ -148,7 +150,7 @@ class RNNModel(nn.Module):
             x: (T x N_out) Torch tensor
                 Activation of the units
             u: (T x N_out) Torch tensor
-                Activity of the units
+                Firing activity of the units
         """
 
         start = time.time()
