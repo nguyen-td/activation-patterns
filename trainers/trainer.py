@@ -42,12 +42,14 @@ class Trainer:
             Time scale of decay
         x0: Scalar
             Initial value of the simulation
+        activation: String
+            Activation function of the recurrent network: "tanh", "relu". Default is "tanh"
 
     [1] Sorscher, B., Mel, G. C., Ocko, S. A., Giocomo, L. M., & Ganguli, S. (2023). A unified theory for the computational and mechanistic origins of grid cells. Neuron, 111(1), 121-137. \n
     [2] Cueva, C. J., & Wei, X. X. (2018). Emergence of grid-like representations by training recurrent neural networks to perform spatial localization. arXiv preprint arXiv:1803.07770.
     """
 
-    def __init__(self, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
+    def __init__(self, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh') -> None:
         self.train_data = train_data
         self.target_data = target_data
         self.model_name = model_name
@@ -67,6 +69,7 @@ class Trainer:
         self.x0 = x0
         self.dt = dt 
         self.tau = tau
+        self.activation = activation
 
     def train(self):
 
@@ -76,7 +79,7 @@ class Trainer:
         n_batches = len(train_batch)
         n_data = self.train_data.shape[0]
 
-        model = RNNModel(self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0)
+        model = RNNModel(self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0, self.activation)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)
