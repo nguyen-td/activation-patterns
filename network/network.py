@@ -30,9 +30,11 @@ class RNNModel(nn.Module):
             Time scale of decay
         x0: Scalar
             Initial value of the simulation 
+        activation: String
+            Activation function of the recurrent network: "tanh", "relu". Default is "tanh"
     """
 
-    def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0):
+    def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh'):
         super(RNNModel, self).__init__()
 
         self.input_size = 2 # velocity, head direction
@@ -46,6 +48,7 @@ class RNNModel(nn.Module):
         self.dt = dt
         self.tau = tau
         self.x0 = x0
+        self.activation = activation
 
         # define layers
         if rnn_layer == 'custom':
@@ -116,7 +119,10 @@ class RNNModel(nn.Module):
 
         # initialization
         x[:, 0, :] = torch.tensor(self.x0, device=self.device)
-        u[:, 0, :] = torch.tanh(x[:, 0, :])
+        if self.activation == 'relu':
+            u[:, 0, :] = torch.relu(x[:, 0, :])
+        else: # tanh
+            u[:, 0, :] = torch.tanh(x[:, 0, :])
         
         # simulate network
         for t in range(T-1):
@@ -141,13 +147,13 @@ class RNNModel(nn.Module):
                 Predicted output trajectories
             x: (T x N_out) Torch tensor
                 Activation of the units
+            u: (T x N_out) Torch tensor
+                Activity of the units
         """
 
         start = time.time()
         aggregate_loss = 0
 
-        y_pred = list()
-        x_test = list()
         with torch.no_grad():
             print('Start evaluation run: ')
             # set up data
@@ -165,7 +171,6 @@ class RNNModel(nn.Module):
             W_out = self.linear.weight
 
             # compute error
-            y[0, :] = target[0, :] # fix starting point
             loss = self.loss(y, target, W_in, W_out, u)
             aggregate_loss += loss.item()
 
@@ -173,7 +178,7 @@ class RNNModel(nn.Module):
             print("\n")
             print(f"Aggregated loss: {aggregate_loss}  {round(end - start, 3)} seconds for this run \n")
 
-        return aggregate_loss, y.detach().cpu().numpy(), x.detach().cpu().numpy()
+        return aggregate_loss, y.detach().cpu().numpy(), x.detach().cpu().numpy(), u.detach().cpu().numpy()
 
 
             

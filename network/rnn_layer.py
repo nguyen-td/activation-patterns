@@ -13,14 +13,14 @@ class RNNLayer(nn.Module):
     M: Mini-batch size
     """
 
-    def __init__(self, input_size, hidden_size, batch_size, device):
+    def __init__(self, input_size, hidden_size, batch_size, activation, device):
         super(RNNLayer, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.batch_size = batch_size
         self.device = device
-
+        self.activation = activation
 
         # initialize trainable parameters according to Cueva & Wei, 2018
         W_in = torch.empty(self.hidden_size, self.input_size)
@@ -57,9 +57,12 @@ class RNNLayer(nn.Module):
         b = torch.t(b.expand(-1, self.batch_size)).double()
         xi = self.xi
         xi = torch.t(xi.expand(-1, self.batch_size)).double()
-
-        x = 1 / tau * (-x + torch.matmul(torch.tanh(x), self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
-        u = torch.tanh(x)
+        
+        if self.activation == 'relu':
+            u = torch.relu(x)
+        else:
+            u = torch.tanh(x)
+        x = 1 / tau * (-x + torch.matmul(u, self.W_rec) + torch.matmul(I, torch.t(self.W_in)) + b + xi)
 
         return x, u
 
