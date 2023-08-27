@@ -128,7 +128,7 @@ class RNNModel(nn.Module):
         
         # simulate network
         for t in range(T-1):
-            x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], u[:, t, :], I[:, t, :], self.dt, self.tau)
+            x[:, t+1, :], u[:, t+1, :] = self.rnn.forward_euler(x[:, t, :], I[:, t, :], self.dt, self.tau)
         y = self.linear(u)
         
         return x, u, y
