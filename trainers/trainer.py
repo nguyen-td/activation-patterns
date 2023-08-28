@@ -43,7 +43,7 @@ class Trainer:
         x0: Scalar
             Initial value of the simulation
         activation: String
-            Activation function of the recurrent network: "tanh", "relu". Default is "tanh"
+            Activation function of the recurrent network: "tanh", "sigmoid", "relu". Default is "tanh"
 
     [1] Sorscher, B., Mel, G. C., Ocko, S. A., Giocomo, L. M., & Ganguli, S. (2023). A unified theory for the computational and mechanistic origins of grid cells. Neuron, 111(1), 121-137. \n
     [2] Cueva, C. J., & Wei, X. X. (2018). Emergence of grid-like representations by training recurrent neural networks to perform spatial localization. arXiv preprint arXiv:1803.07770.

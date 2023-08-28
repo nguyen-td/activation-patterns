@@ -31,7 +31,7 @@ class RNNModel(nn.Module):
         x0: Scalar
             Initial value of the simulation 
         activation: String
-            Activation function of the recurrent network: "tanh", "relu", "heaviside". Default is "tanh"
+            Activation function of the recurrent network: "tanh", "relu", "sigmoid". Default is "tanh"
     """
 
     def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh'):
@@ -121,9 +121,8 @@ class RNNModel(nn.Module):
         x[:, 0, :] = torch.tensor(self.x0, device=self.device)
         if self.activation == 'relu':
             u[:, 0, :] = torch.relu(x[:, 0, :])
-        elif self.activation == 'heaviside': # heaviside step function
-            with torch.no_grad():
-                u[:, 0, :] = torch.heaviside(x[:, 0, :], torch.tensor([1.0], dtype=torch.float64, device=self.device))
+        elif self.activation == 'sigmoid': 
+            u[:, 0, :] = torch.sigmoid(x[:, 0, :])
         else: # tanh
             u[:, 0, :] = torch.tanh(x[:, 0, :])
         
