@@ -120,6 +120,7 @@ class Trainer:
                 W_out = model.linear.weight
 
                 # compute error
+                y[:, 0, :] = target[:, 0, :] # fix starting point
                 loss = model.loss(y, target, W_in, W_out, u)
                 train_loss += loss.item()
 
