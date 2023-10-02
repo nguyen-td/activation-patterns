@@ -8,7 +8,7 @@ from utils import make_train_data, TrajectoryGenerator
 from network.network import RNNModel
 
 # generate training data
-T = 20  # duration of simulated trajectories (seconds)
+T = 10 * 60  # duration of simulated trajectories (seconds)
 srate = 50  # sampling rate (Hz)
 
 border_region = 0.03  # max. distance to wall (m)
@@ -28,7 +28,7 @@ n_epochs = 20
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}'
-activation = 'tanh'
+activation = 'relu'
 
 trainer = Trainer(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, rnn_layer=rnn_layer, n_epochs=n_epochs, activation=activation)
 train_loss_epochs = trainer.train()
