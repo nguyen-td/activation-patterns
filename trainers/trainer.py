@@ -102,7 +102,7 @@ class Trainer:
                 train = torch.as_tensor(np.array(train_batch[batch]), device=self.device)
                 target = torch.as_tensor(np.array(target_batch[batch]), device=self.device)
 
-                # pad data if the number of dat a points is smaller than the selected mini-batch size
+                # pad data if the number of data points is smaller than the selected mini-batch size
                 # FIXME: fix this by resampling from the whole data set
                 if train.size(0) < self.mini_batch_size:
                     train, target = batch_padding(train, target, self.mini_batch_size)

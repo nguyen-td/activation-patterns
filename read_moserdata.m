@@ -29,7 +29,8 @@ vel_x = dx ./ dt; % cm/s
 vel_y = dy ./ dt; % cm/s
 
 figure; plot(vel_x)
+figure; plot(vel_y)
 
 % save as data matrix
 save_mat = {pos.posx, pos.posy, vel_x, vel_y};
-save('t2c1.mat', 'save_mat')
+save('data/t2c1.mat', 'save_mat')
