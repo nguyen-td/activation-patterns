@@ -11,11 +11,11 @@ from network.network import RNNModel
 mini_batch_size = 16
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
-data_type = 'real' # "simulated" or "real"
+data_type = 'sim' # "sim" or "real"
 
 # generate training data
-if data_type == 'simulated':
-    T = 10 * 60  # duration of simulated trajectories (seconds)
+if data_type == 'sim':
+    T = 20  # duration of simulated trajectories (seconds)
     srate = 50  # sampling rate (Hz)
 
     border_region = 0.03  # max. distance to wall (m)

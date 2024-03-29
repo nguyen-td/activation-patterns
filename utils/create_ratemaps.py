@@ -62,7 +62,7 @@ def create_ratemaps(x, y_pred, box_width, box_height):
 
     return spatial_maps
 
-def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, smooth=True):
+def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, fname, smooth=True):
     """
     Plot spatial ratemaps and save the final figure.
 
@@ -77,6 +77,8 @@ def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, 
             Height (in 2D, could also be length) of the artificial box in meters
         resolution: Scalar
             Size of each bin
+        fname: String
+            File name
         smooth: Boolean
             If True, Gaussian smoothing will be applied
     """
@@ -104,6 +106,7 @@ def plot_ratemaps(spatial_maps, hidden_size, box_width, box_height, resolution, 
         axs[int(comb[0]), int(comb[1])].set_ylim([-box_width / 2, box_width / 2])
         axs[int(comb[0]), int(comb[1])].set_axis_off()
 
-    fig.savefig('ratemaps.png', bbox_inches='tight')
+
+    fig.savefig(f'ratemaps\{fname}.png', bbox_inches='tight')
 
 
