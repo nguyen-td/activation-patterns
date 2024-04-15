@@ -8,7 +8,7 @@ from utils import make_train_data, TrajectoryGenerator, load_moserdata
 from network.network import RNNModel
 
 # settings
-mini_batch_size = 32
+mini_batch_size = 16
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
 data_type = 'sim' # "sim" or "real"
