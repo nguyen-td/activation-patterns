@@ -15,6 +15,7 @@ box_width = 2.2       # width of training environment (m)
 box_height = 2.2      # height of training environment (m)
 mini_batch_size = 32
 n_data = mini_batch_size * 314
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
 trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
 position, velocity, head_dir = trajectory_generator.generate_trajectory()
@@ -28,5 +29,5 @@ n_terations = 10000
 rnn_layer = 'tanh' 
 model_name = f'RNN-{hidden_size}-{rnn_layer}-NE'
 
-trainer = Trainer_NE(train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, pop_size=pop_size, num_actors="num_gpus", rnn_layer=rnn_layer, n_iterations=n_terations)
+trainer = Trainer_NE(device, train, position, model_name, hidden_size=hidden_size, mini_batch_size=mini_batch_size, pop_size=pop_size, num_actors="num_gpus", rnn_layer=rnn_layer, n_iterations=n_terations)
 trainer.train()
