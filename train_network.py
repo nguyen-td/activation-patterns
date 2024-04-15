@@ -12,7 +12,8 @@ mini_batch_size = 32
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
 data_type = 'sim' # "sim" or "real"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+device = "cpu:0"
 
 # generate training data
 if data_type == 'sim':
