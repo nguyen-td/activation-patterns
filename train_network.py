@@ -12,10 +12,11 @@ mini_batch_size = 16
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
 data_type = 'sim' # "sim" or "real"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 
 # generate training data
 if data_type == 'sim':
-    T = 20  # duration of simulated trajectories (seconds)
+    T = 600  # duration of simulated trajectories (seconds)
     srate = 50  # sampling rate (Hz)
 
     border_region = 0.03  # max. distance to wall (m)

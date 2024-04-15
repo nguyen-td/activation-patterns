@@ -34,14 +34,14 @@ class RNNModel(nn.Module):
             Activation function of the recurrent network: "tanh", "relu", "sigmoid". Default is "tanh"
     """
 
-    def __init__(self, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh'):
+    def __init__(self, device, hidden_size, batch_size, rnn_layer='native', l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh'):
         super(RNNModel, self).__init__()
 
         self.input_size = 2 # velocity, head direction
         self.hidden_size = hidden_size
         self.output_size = 2
         self.batch_size = batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+        self.device = device
         self.rnn_layer = rnn_layer
 
         # simulation parameters

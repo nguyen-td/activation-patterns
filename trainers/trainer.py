@@ -49,14 +49,14 @@ class Trainer:
     [2] Cueva, C. J., & Wei, X. X. (2018). Emergence of grid-like representations by training recurrent neural networks to perform spatial localization. arXiv preprint arXiv:1803.07770.
     """
 
-    def __init__(self, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh') -> None:
+    def __init__(self, device, train_data, target_data, model_name, rnn_layer='native', n_epochs=100, mini_batch_size=64, hidden_size=100, learning_rate=1e-4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0, activation='tanh') -> None:
         self.train_data = train_data
         self.target_data = target_data
         self.model_name = model_name
         self.rnn_layer = rnn_layer
 
         self.mini_batch_size = mini_batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+        self.device = device
 
         # model parameters
         self.hidden_size = hidden_size
@@ -78,7 +78,7 @@ class Trainer:
         target_batch = list((chunked(self.target_data, self.mini_batch_size)))
         n_batches = len(train_batch)
 
-        model = RNNModel(self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0, self.activation)
+        model = RNNModel(self.device, self.hidden_size, self.mini_batch_size, self.rnn_layer, self.l2_rate, self.fr_rate, self.dt, self.tau, self.x0, self.activation)
         model.double()
         optimizer = optim.RMSprop(model.parameters(), lr=self.learning_rate)
         model.to(self.device)

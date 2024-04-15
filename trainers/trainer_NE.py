@@ -44,14 +44,14 @@ class Trainer_NE:
             Initial value of the simulation
     """
 
-    def __init__(self, train_data, target_data, model_name, rnn_layer='native', pop_size=50, n_iterations=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
+    def __init__(self, device, train_data, target_data, model_name, rnn_layer='native', pop_size=50, n_iterations=100, mini_batch_size=64, hidden_size=100, num_actors=4, l2_rate=1e-4, fr_rate=1e-4, dt=0.02, tau=0.1, x0=0) -> None:
         self.train_dataset = TensorDataset(torch.as_tensor(train_data), torch.as_tensor(target_data))
         self.model_name = model_name
         self.rnn_layer = rnn_layer
 
         self.pop_size = pop_size
         self.mini_batch_size = mini_batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+        self.device = device
 
         # model parameters
         self.hidden_size = hidden_size
