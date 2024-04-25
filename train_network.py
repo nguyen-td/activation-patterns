@@ -33,8 +33,6 @@ if data_type == 'sim':
 else:
     position, vel_x, vel_y = load_moserdata(f't2c1_{T_real}min.mat', n_data)
     torch.save([position[0], vel_x[0], vel_y[0]], f'data\data-{activation}-{data_type}-{T_real}.pt')
-
-
     
 train = make_train_data(vel_x, vel_y)
 
