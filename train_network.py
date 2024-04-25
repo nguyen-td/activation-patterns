@@ -53,4 +53,9 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.savefig('loss.png', bbox_inches='tight')
 
+if data_type == 'sim':  
+    torch.save(train_loss_epochs, f'models\loss-{activation}-{data_type}-{T_sim}.pt')
+else:
+    torch.save(train_loss_epochs, f'data\data-{activation}-{data_type}-{T_real}.pt')
+
 # plt.show()
