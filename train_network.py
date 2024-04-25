@@ -11,7 +11,8 @@ from network.network import RNNModel
 mini_batch_size = 16
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
-data_type = 'sim' # "sim" or "real"
+data_type = 'real' # "sim" or "real"
+T = 1 # duration in minutes, for real data
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 device = "cpu:0"
 
@@ -28,14 +29,14 @@ if data_type == 'sim':
     trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
     position, vel_x, vel_y = trajectory_generator.generate_trajectory() # position, velocity, head_direction
 else:
-    position, vel_x, vel_y = load_moserdata('t2c1.mat', n_data)
+    position, vel_x, vel_y = load_moserdata(f't2c1_{T}min.mat', n_data)
 
     
 torch.save([position[0], vel_x[0], vel_y[0]], f'data\data-{activation}-{data_type}.pt')
 train = make_train_data(vel_x, vel_y)
 
 # start training
-n_epochs = 20
+n_epochs = 10
 hidden_size = 256
 rnn_layer = 'custom'
 model_name = f'RNN-{hidden_size}-{rnn_layer}-{activation}-{data_type}'

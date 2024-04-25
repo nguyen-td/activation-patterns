@@ -21,6 +21,9 @@ hold on;
 scatter(pos.posx(time_idx), pos.posy(time_idx), 'red', 'filled')
 
 %% Convert absolute x-y trajectories into velocities
+mins = 1; % duration in min
+T = mins * 50 * 60; % duration in s
+
 dt = comp_delta(pos.post);
 dx = comp_delta(pos.posx);
 dy = comp_delta(pos.posy);
@@ -32,5 +35,5 @@ figure; plot(vel_x)
 figure; plot(vel_y)
 
 % save as data matrix
-save_mat = {pos.posx, pos.posy, vel_x, vel_y};
-save('data/t2c1.mat', 'save_mat')
+save_mat = {pos.posx(1:T), pos.posy(1:T), vel_x(1:T-1), vel_y(1:T-1)};
+save(['data/t2c1_' int2str(mins) 'min.mat'], 'save_mat')
