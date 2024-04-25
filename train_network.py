@@ -13,6 +13,7 @@ n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
 data_type = 'sim' # "sim" or "real"
 T_real = 1 # duration in minutes, for real data
+lr = 1e-4 # default
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 device = "cpu:1"
 
