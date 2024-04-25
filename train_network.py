@@ -12,7 +12,7 @@ mini_batch_size = 16
 n_data = mini_batch_size * 1000
 activation = 'relu' # type of activation function
 data_type = 'real' # "sim" or "real"
-T = 1 # duration in minutes, for real data
+T_real = 1 # duration in minutes, for real data
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
 device = "cpu:0"
 
@@ -28,11 +28,14 @@ if data_type == 'sim':
 
     trajectory_generator = TrajectoryGenerator(sequence_length, border_region, box_width, box_height, n_data)
     position, vel_x, vel_y = trajectory_generator.generate_trajectory() # position, velocity, head_direction
+
+    torch.save([position[0], vel_x[0], vel_y[0]], f'data\data-{activation}-{data_type}.pt')
 else:
-    position, vel_x, vel_y = load_moserdata(f't2c1_{T}min.mat', n_data)
+    position, vel_x, vel_y = load_moserdata(f't2c1_{T_real}min.mat', n_data)
+    torch.save([position[0], vel_x[0], vel_y[0]], f'data\data-{activation}-{data_type}-{T_real}.pt')
+
 
     
-torch.save([position[0], vel_x[0], vel_y[0]], f'data\data-{activation}-{data_type}.pt')
 train = make_train_data(vel_x, vel_y)
 
 # start training
