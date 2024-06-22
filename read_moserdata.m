@@ -19,6 +19,7 @@ end
 figure; plot(pos.posx, pos.posy) 
 hold on;
 scatter(pos.posx(time_idx), pos.posy(time_idx), 'red', 'filled')
+set(gca,'xtick',[],'ytick',[]);
 
 %% Convert absolute x-y trajectories into velocities
 mins = 1; % duration in min
@@ -37,3 +38,13 @@ figure; plot(vel_y)
 % save as data matrix
 save_mat = {pos.posx(1:T), pos.posy(1:T), vel_x(1:T-1), vel_y(1:T-1)};
 save(['data/t2c1_' int2str(mins) 'min.mat'], 'save_mat')
+
+%% Plot grid cell map for 1 min data
+posx_T = pos.posx(1:T);
+posy_T = pos.posy(1:T);
+time_idx_T = time_idx(time_idx <= size(posx_T, 1));
+
+figure; plot(posx_T, posy_T) 
+hold on;
+scatter(posx_T(time_idx_T), posy_T(time_idx_T), 'red', 'filled')
+set(gca,'xtick',[],'ytick',[]);
